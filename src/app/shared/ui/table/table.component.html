@@ -1,0 +1,170 @@
+<div
+  class="ring-offset-background focus-visible:ring-ring relative mt-2 flex flex-col gap-4 overflow-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+  @if (loading) {
+  <div class="flex justify-center py-8">
+    <div class="border-primary-600 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2"></div>
+  </div>
+  }
+
+  @if (error) {
+  <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700">
+    {{ error }}
+  </div>
+  }
+
+  <div class="overflow-hidden rounded-lg border">
+    <div class="relative w-full overflow-auto">
+      <table class="w-full caption-bottom text-sm">
+        <thead class="[&amp;_tr]:border-b sticky top-0 z-10 bg-neutral-100">
+          <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100">
+            <!-- Select All Checkbox -->
+            @if (selectable) {
+              <th
+                class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                <div class="flex items-center justify-center">
+                  <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
+                    (change)="toggleAllRows()"
+                    class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900"
+                    [disabled]="data.length === 0">
+                </div>
+              </th>
+            }
+
+            <!-- Column Headers -->
+            @for (column of columns; track column.key) {
+              <th class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]" [style.width]="column.width">
+                {{ column.label }}
+              </th>
+            }
+
+            <!-- Actions Header -->
+            @if (actions.length > 0) {
+              <th
+                class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                Actions
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="[&amp;_tr:last-child]:border-0">
+          <!-- Data Rows -->
+          @for (row of data; track row.id) {
+            <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100">
+              <!-- Row Checkbox -->
+              @if (selectable) {
+                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                  <div class="flex items-center justify-center">
+                    <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
+                      class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900">
+                  </div>
+                </td>
+              }
+
+              <!-- Data Cells -->
+              @for (column of columns; track column.key) {
+                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                  @if (column.type === 'badge') {
+                    <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
+                      {{ formatCellValue(row, column) }}
+                    </app-badge>
+                  } @else {
+                    {{ formatCellValue(row, column) }}
+                  }
+                </td>
+              }
+
+              <!-- Actions dropdown -->
+              @if (actions.length > 0) {
+                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                  <div class="flex justify-center gap-2">
+                    <app-dropdown-menu
+                      [actions]="actions"
+                      [rowData]="row"
+                      [side]="DropdownSide.Left"
+                      [align]="DropdownAlign.Start"
+                      [sideOffset]="0"
+                      (actionSelected)="onDropdownAction($event)"
+                    ></app-dropdown-menu>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+          @if (data.length === 0 && !loading) {
+          <tr>
+            <td [colSpan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
+              class="p-4 text-center text-gray-500">
+              No data available
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (pagination) {
+  <div class="flex items-center justify-between px-4">
+    <div class="text-neutral-100-foreground hidden flex-1 text-sm lg:flex">
+      {{ selectedRows.size }} of {{ pagination.total }} row(s) selected.
+    </div>
+    <div class="flex w-full items-center gap-8 lg:w-fit">
+      <div class="hidden items-center gap-2 lg:flex">
+        <label for="rowsPerPage" class="text-sm font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          Rows per page
+        </label>
+        <select id="rowsPerPage" (change)="changePageSize($any($event.target).value)"
+          class="flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background data-[placeholder]:text-neutral-100-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1 w-20">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div class="flex w-fit items-center justify-center text-sm font-medium">
+        Page {{ pagination.page }} of {{ pagination.pageCount }}
+      </div>
+      <div class="ml-auto flex items-center gap-2 lg:ml-0">
+        <button (click)="changePage(1)" [disabled]="pagination.page === 1"
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border p-0 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Go to first page</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevrons-left">
+            <path d="m11 17-5-5 5-5"></path>
+            <path d="m18 17-5-5 5-5"></path>
+          </svg>
+        </button>
+        <button (click)="changePage(pagination.page - 1)" [disabled]="pagination.page === 1"
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Go to previous page</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevron-left">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button (click)="changePage(pagination.page + 1)" [disabled]="pagination.page === pagination.pageCount"
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Go to next page</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevron-right">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+        <button (click)="changePage(pagination.pageCount)" [disabled]="pagination.page === pagination.pageCount"
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Go to last page</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevrons-right">
+            <path d="m6 17 5-5-5-5"></path>
+            <path d="m13 17 5-5-5-5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

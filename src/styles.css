@@ -1,0 +1,9 @@
+@import '@angular/cdk/overlay-prebuilt.css';
+@import "tailwindcss";
+
+* {
+  outline-color: #e2e8f0;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+  border-color: #e2e8f0;
+}

@@ -1,0 +1,33 @@
+<button
+  class="inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100 focus:outline-none"
+  [rdxDropdownMenuTrigger]="menu"
+  [side]="side"
+  [sideOffset]="sideOffset"
+  [align]="align"
+  [alignOffset]="alignOffset"
+  aria-label="Open actions menu"
+>
+  <lucide-angular [img]="EllipsisVertical" size="16" />
+</button>
+
+<ng-template #menu>
+  <div
+    class="z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-white p-1 text-neutral-600 shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin] w-32"
+    rdxDropdownMenuContent
+  >
+    @for (action of actions; track action.label) {
+      <button
+        class="group relative flex w-full items-center rounded outline-none px-2 py-1.5 text-sm text-gray-900 hover:bg-gray-100"
+        rdxDropdownMenuItem
+        (click)="onAction(action)"
+      >
+        @if (action.icon) {
+          <span class="mr-2">
+            <lucide-angular [img]="action.icon" size="14" />
+          </span>
+        }
+        {{ action.label }}
+      </button>
+    }
+  </div>
+</ng-template>

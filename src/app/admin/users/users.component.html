@@ -1,0 +1,10 @@
+<app-content-layout [title]="'Usuarios'" [description]="'Lista de usuarios'">
+  <app-table
+    [columns]="columns"
+    [data]="users"
+    [selectable]="true"
+    [actions]="tableActions"
+    (actionTriggered)="onAction($event)"
+  >
+  </app-table>
+</app-content-layout>
