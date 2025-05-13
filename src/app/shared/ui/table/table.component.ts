@@ -36,19 +36,7 @@ export class TableComponent<T extends { id: number | string }> {
    * Handles dropdown menu actions
    */
   onDropdownAction(event: { action: string, row: T }): void {
-    // Find the matching action
-    const action = this.actions.find(a => a.label === event.action);
-
-    if (action) {
-      try {
-        // Execute the action
-        action.action(event.row);
-        // Emit the event to parent component
-        this.actionTriggered.emit(event);
-      } catch (error) {
-        console.error('Error executing table action:', error);
-      }
-    }
+    this.actionTriggered.emit(event);
   }
 
   toggleRowSelection(row: T): void {

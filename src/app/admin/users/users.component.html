@@ -1,10 +1,61 @@
-<app-content-layout [title]="'Usuarios'" [description]="'Lista de usuarios'">
-  <app-table
-    [columns]="columns"
-    [data]="users"
-    [selectable]="true"
-    [actions]="tableActions"
-    (actionTriggered)="onAction($event)"
-  >
-  </app-table>
+<app-content-layout [title]="'Usuarios'" [description]="'Lista de usuarios'" [actions]="contentActions">
+  <app-table [columns]="columns" [data]="users" [selectable]="true" [actions]="tableActions" [pagination]="pagination"
+    [loading]="loading" (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"></app-table>
 </app-content-layout>
+
+<!-- Create User Dialog -->
+<ng-template #createDialog>
+  <div ubDialogContent>
+    <div ubDialogHeader>
+      <h2 ubDialogTitle>Crear Usuario</h2>
+      <p ubDialogDescription>Añade un nuevo usuario al sistema</p>
+    </div>
+
+    <app-user-form [isEditMode]="false" [user]="currentUser" (userSubmitted)="onCreateUser($event)"></app-user-form>
+
+    <!--
+      <div ubDialogFooter>
+        <button ubButton variant="outline" ubDialogClose>Cancel</button>
+      </div>
+    -->
+  </div>
+</ng-template>
+
+<!-- Edit User Dialog -->
+<ng-template #editDialog>
+  <div ubDialogContent>
+    <div ubDialogHeader>
+      <h2 ubDialogTitle>Editar Usuario</h2>
+      <p ubDialogDescription>Modifica los detalles del usuario</p>
+    </div>
+
+    <app-user-form [isEditMode]="true" [user]="currentUser" (userSubmitted)="onUpdateUser($event)"></app-user-form>
+  </div>
+</ng-template>
+
+<!-- Delete User Dialog -->
+<ng-template #deleteDialog>
+  <div ubDialogContent>
+    <div ubDialogHeader>
+      <h2 ubDialogTitle>Eliminar Usuario</h2>
+      <p ubDialogDescription>Confirma la eliminación del usuario</p>
+    </div>
+
+    <div class="border border-red-200! bg-red-50 p-4 rounded-md text-sm">
+      <p>Est&aacute;s a punto de eliminar el usuario <b>{{ currentUser.name }}</b>. Esta accion no se puede deshacer.
+      </p>
+    </div>
+
+    <div ubDialogFooter>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
+        ubDialogClose>
+        Cancelar
+      </button>
+      <button type="submit" ubDialogClose
+        class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">
+        Eliminar
+      </button>
+    </div>
+  </div>
+</ng-template>

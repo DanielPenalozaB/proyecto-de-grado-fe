@@ -41,6 +41,5 @@ export class DropdownMenuComponent<T> {
 
   onAction(action: DropdownAction<T>): void {
     this.actionSelected.emit({ action: action.label, row: this.rowData });
-    action.action(this.rowData);
   }
 }

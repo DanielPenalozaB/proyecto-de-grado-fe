@@ -1,0 +1,55 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div
+    class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+    ubDialogContent
+  >
+    <div ubDialogHeader>
+      <h2 ubDialogTitle>{{ isEditMode ? 'Edit User' : 'Create User' }}</h2>
+      <p ubDialogDescription>
+        {{ isEditMode ? 'Make changes to the user.' : 'Fill in the user details.' }}
+      </p>
+    </div>
+
+    <div class="grid gap-4 py-4">
+      <div class="grid grid-cols-4 items-center gap-4">
+        <label for="name" class="text-right">Name</label>
+        <input
+          id="name"
+          [(ngModel)]="user.name"
+          class="col-span-3 rounded border p-2"
+          required
+        >
+      </div>
+      <div class="grid grid-cols-4 items-center gap-4">
+        <label for="email" class="text-right">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="user.email"
+          class="col-span-3 rounded border p-2"
+          required
+        >
+      </div>
+      <!-- Add more fields as needed -->
+    </div>
+
+    <div ubDialogFooter class="flex justify-end gap-2 mt-4">
+      <button
+        type="button"
+        ubButton
+        variant="outline"
+        (click)="onCancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        ubButton
+        (click)="onSubmit()"
+        [disabled]="!user.name || !user.email"
+      >
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>

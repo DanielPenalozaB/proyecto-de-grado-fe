@@ -1,10 +1,5 @@
 <div
   class="ring-offset-background focus-visible:ring-ring relative mt-2 flex flex-col gap-4 overflow-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
-  @if (loading) {
-  <div class="flex justify-center py-8">
-    <div class="border-primary-600 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2"></div>
-  </div>
-  }
 
   @if (error) {
   <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700">
@@ -19,76 +14,73 @@
           <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100">
             <!-- Select All Checkbox -->
             @if (selectable) {
-              <th
-                class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-                <div class="flex items-center justify-center">
-                  <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
-                    (change)="toggleAllRows()"
-                    class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900"
-                    [disabled]="data.length === 0">
-                </div>
-              </th>
+            <th
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              <div class="flex items-center justify-center">
+                <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
+                  (change)="toggleAllRows()"
+                  class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900"
+                  [disabled]="data.length === 0">
+              </div>
+            </th>
             }
 
             <!-- Column Headers -->
             @for (column of columns; track column.key) {
-              <th class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]" [style.width]="column.width">
-                {{ column.label }}
-              </th>
+            <th
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]"
+              [style.width]="column.width">
+              {{ column.label }}
+            </th>
             }
 
             <!-- Actions Header -->
             @if (actions.length > 0) {
-              <th
-                class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-                Actions
-              </th>
+            <th
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+            </th>
             }
           </tr>
         </thead>
         <tbody class="[&amp;_tr:last-child]:border-0">
           <!-- Data Rows -->
           @for (row of data; track row.id) {
-            <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100">
-              <!-- Row Checkbox -->
-              @if (selectable) {
-                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-                  <div class="flex items-center justify-center">
-                    <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
-                      class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900">
-                  </div>
-                </td>
-              }
+          <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100"
+            [class.bg-neutral-100]="selectedRows.has(row)">
+            <!-- Row Checkbox -->
+            @if (selectable) {
+            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              <div class="flex items-center justify-center">
+                <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
+                  class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900">
+              </div>
+            </td>
+            }
 
-              <!-- Data Cells -->
-              @for (column of columns; track column.key) {
-                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-                  @if (column.type === 'badge') {
-                    <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
-                      {{ formatCellValue(row, column) }}
-                    </app-badge>
-                  } @else {
-                    {{ formatCellValue(row, column) }}
-                  }
-                </td>
+            <!-- Data Cells -->
+            @for (column of columns; track column.key) {
+            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              @if (column.type === 'badge') {
+              <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
+                {{ formatCellValue(row, column) }}
+              </app-badge>
+              } @else {
+              {{ formatCellValue(row, column) }}
               }
+            </td>
+            }
 
-              <!-- Actions dropdown -->
-              @if (actions.length > 0) {
-                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-                  <div class="flex justify-center gap-2">
-                    <app-dropdown-menu
-                      [actions]="actions"
-                      [rowData]="row"
-                      [side]="DropdownSide.Left"
-                      [align]="DropdownAlign.Start"
-                      [sideOffset]="0"
-                      (actionSelected)="onDropdownAction($event)"
-                    ></app-dropdown-menu>
-                  </div>
-                </td>
-              }
-            </tr>
+            <!-- Actions dropdown -->
+            @if (actions.length > 0) {
+            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              <div class="flex justify-center gap-2">
+                <app-dropdown-menu [actions]="actions" [rowData]="row" [side]="DropdownSide.Left"
+                  [align]="DropdownAlign.Start" [sideOffset]="0"
+                  (actionSelected)="onDropdownAction($event)"></app-dropdown-menu>
+              </div>
+            </td>
+            }
+          </tr>
           }
           @if (data.length === 0 && !loading) {
           <tr>
@@ -102,6 +94,12 @@
       </table>
     </div>
   </div>
+
+  @if (loading) {
+  <div class="flex justify-center py-8">
+    <div class="border-primary-600 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2"></div>
+  </div>
+  }
 
   @if (pagination) {
   <div class="flex items-center justify-between px-4">

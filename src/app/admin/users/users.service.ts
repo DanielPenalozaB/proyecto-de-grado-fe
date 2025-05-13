@@ -1,3 +1,4 @@
+import { UserFormData } from '@/app/feature/admin/users/user-form/user-form.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -40,7 +41,7 @@ export class UsersService {
    * @param user User data without ID
    * @returns Observable of the created User
    */
-  createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Observable<User> {
+  createUser(user: Omit<UserFormData, 'id' | 'createdAt' | 'updatedAt'>): Observable<User> {
     return this.http.post<User>(this.apiUrl, user);
   }
 
