@@ -3,7 +3,7 @@
     <div>
       <h2 class="text-2xl font-bold tracking-tight">{{ title }}</h2>
       @if (description) {
-      <p class="text-muted-foreground">{{ description }}</p>
+        <p class="text-neutral-500">{{ description }}</p>
       }
     </div>
     <div class="flex gap-2">
@@ -11,7 +11,7 @@
       <app-button [size]="'sm'" (click)="actionTriggered.emit(action.label); action.action()" [ngClass]="action.style">
         {{ action.label }}
         @if (action.icon) {
-        <lucide-icon [img]="action.icon" />
+          <lucide-icon [img]="action.icon" />
         }
       </app-button>
       }
