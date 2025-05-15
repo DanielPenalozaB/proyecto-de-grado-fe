@@ -3,9 +3,11 @@ import { LucideIconData } from "lucide-angular";
 export interface TableColumn {
   key: string;
   label: string;
+  class?: string;
   type?: 'text' | 'date' | 'badge' | 'action';
   format?: <T>(value: T) => string;
   width?: string;
+  truncate?: boolean;
 }
 
 export interface TableAction<T> {
