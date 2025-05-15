@@ -15,7 +15,7 @@
             <!-- Select All Checkbox -->
             @if (selectable) {
             <th
-              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
               <div class="flex items-center justify-center">
                 <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
                   (change)="toggleAllRows()"
@@ -28,7 +28,7 @@
             <!-- Column Headers -->
             @for (column of columns; track column.key) {
             <th
-              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]"
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]"
               [style.width]="column.width">
               {{ column.label }}
             </th>
@@ -37,7 +37,7 @@
             <!-- Actions Header -->
             @if (actions.length > 0) {
             <th
-              class="h-10 px-2 text-left align-middle font-medium text-neutral-100-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
             </th>
             }
           </tr>
@@ -59,7 +59,8 @@
 
             <!-- Data Cells -->
             @for (column of columns; track column.key) {
-            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+            <td
+              class="p-2 align-middle text-neutral-800 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
               @if (column.type === 'badge') {
               <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
                 {{ formatCellValue(row, column) }}
@@ -86,7 +87,7 @@
           <tr>
             <td [colSpan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
               class="p-4 text-center text-gray-500">
-              No data available
+              No hay registros
             </td>
           </tr>
           }
@@ -103,16 +104,20 @@
 
   @if (pagination) {
   <div class="flex items-center justify-between px-4">
-    <div class="text-neutral-100-foreground hidden flex-1 text-sm lg:flex">
-      {{ selectedRows.size }} of {{ pagination.total }} row(s) selected.
+    <div class="text-neutral-600 hidden flex-1 text-sm lg:flex">
+      @if (selectable === true) {
+      {{ selectedRows.size }} of {{ pagination.total }} {{ pagination.total === 1 ? 'item' : 'items' }} seleccionados
+      } @else {
+      {{ pagination.total }} {{ pagination.total === 1 ? 'item' : 'items' }} en total
+      }
     </div>
     <div class="flex w-full items-center gap-8 lg:w-fit">
       <div class="hidden items-center gap-2 lg:flex">
         <label for="rowsPerPage" class="text-sm font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Rows per page
+          Filas por página
         </label>
-        <select id="rowsPerPage" (change)="changePageSize($any($event.target).value)"
-          class="flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background data-[placeholder]:text-neutral-100-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1 w-20">
+        <select id="rowsPerPage" (change)="changeLimit($any($event.target).value)"
+          class="flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background data-[placeholder]:text-neutral-600 focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1 w-20">
           <option value="10">10</option>
           <option value="25">25</option>
           <option value="50">50</option>
@@ -120,46 +125,28 @@
         </select>
       </div>
       <div class="flex w-fit items-center justify-center text-sm font-medium">
-        Page {{ pagination.page }} of {{ pagination.pageCount }}
+        P&aacute;gina {{ pagination.page }} de {{ pagination.pageCount }}
       </div>
       <div class="ml-auto flex items-center gap-2 lg:ml-0">
         <button (click)="changePage(1)" [disabled]="pagination.page === 1"
-          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border p-0 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <span class="sr-only">Go to first page</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-chevrons-left">
-            <path d="m11 17-5-5 5-5"></path>
-            <path d="m18 17-5-5 5-5"></path>
-          </svg>
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border p-2 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Ir a la primera página</span>
+          <lucide-icon [img]="ChevronsLeft" class="h-4 w-4" />
         </button>
         <button (click)="changePage(pagination.page - 1)" [disabled]="pagination.page === 1"
           class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <span class="sr-only">Go to previous page</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-chevron-left">
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
+          <span class="sr-only">Ir a la página anterior</span>
+          <lucide-icon [img]="ChevronLeft" class="h-4 w-4" />
         </button>
         <button (click)="changePage(pagination.page + 1)" [disabled]="pagination.page === pagination.pageCount"
           class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <span class="sr-only">Go to next page</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-chevron-right">
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
+          <span class="sr-only">Ir a la página siguiente</span>
+          <lucide-icon [img]="ChevronRight" class="h-4 w-4" />
         </button>
         <button (click)="changePage(pagination.pageCount)" [disabled]="pagination.page === pagination.pageCount"
-          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
-          <span class="sr-only">Go to last page</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-chevrons-right">
-            <path d="m6 17 5-5-5-5"></path>
-            <path d="m13 17 5-5-5-5"></path>
-          </svg>
+          class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 p-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
+          <span class="sr-only">Ir a la última página</span>
+          <lucide-icon [img]="ChevronsRight" class="h-4 w-4" />
         </button>
       </div>
     </div>

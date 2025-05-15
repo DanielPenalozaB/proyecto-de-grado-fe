@@ -1,5 +1,5 @@
-import type { ToasterProps } from 'ngx-sonner'
 import { booleanAttribute, Component, input, numberAttribute } from '@angular/core'
+import type { ToasterProps } from 'ngx-sonner'
 import { NgxSonnerToaster } from 'ngx-sonner'
 
 @Component({
@@ -58,7 +58,7 @@ export class ToasterComponent {
   toastOptions = input<ToasterProps['toastOptions']>({
     classes: {
       toast:
-        'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+        'group toast group-[.toaster]:bg-white group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
       description: 'group-[.toast]:text-muted-foreground',
       actionButton:
         'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground font-medium',

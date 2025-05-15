@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DropdownAlign, DropdownSide } from '@radix-ng/primitives/dropdown-menu';
-import { LucideAngularModule } from 'lucide-angular';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LucideAngularModule } from 'lucide-angular';
 import { BadgeComponent } from '../badge/badge.component';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 import { Pagination, TableAction, TableColumn } from './table.interfaces';
@@ -24,13 +24,19 @@ export class TableComponent<T extends { id: number | string }> {
 
   @Output() rowSelected = new EventEmitter<T[]>();
   @Output() pageChange = new EventEmitter<number>();
-  @Output() pageSizeChange = new EventEmitter<number>();
+  @Output() limitChange = new EventEmitter<number>();
   @Output() actionTriggered = new EventEmitter<{ action: string, row: T }>();
 
   selectedRows = new Set<T>();
 
   readonly DropdownSide = DropdownSide;
   readonly DropdownAlign = DropdownAlign;
+
+  // Pagination icons
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
+  readonly ChevronsLeft = ChevronsLeft;
+  readonly ChevronsRight = ChevronsRight;
 
   /**
    * Handles dropdown menu actions
@@ -57,8 +63,13 @@ export class TableComponent<T extends { id: number | string }> {
     this.rowSelected.emit(Array.from(this.selectedRows));
   }
 
-  onAction(action: TableAction<T>, row: T): void {
-    this.actionTriggered.emit({ action: action.label, row });
+  onAction(event: { action: string, row: T }): void {
+    const action = this.actions.find(a => a.label === event.action);
+
+    if (action) {
+      action.action(event.row);
+      this.actionTriggered.emit(event);
+    }
   }
 
   changePage(page: number): void {
@@ -67,8 +78,8 @@ export class TableComponent<T extends { id: number | string }> {
     }
   }
 
-  changePageSize(size: number): void {
-    this.pageSizeChange.emit(size);
+  changeLimit(size: number): void {
+    this.limitChange.emit(size);
   }
 
   formatCellValue(row: T, column: TableColumn): string {

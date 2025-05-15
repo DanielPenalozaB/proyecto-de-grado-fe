@@ -4,7 +4,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 export interface UserFormData {
-  id?: number;
+  id?: number | null;
   name: string;
   email: string;
   role?: string;
@@ -32,7 +32,6 @@ export interface UserFormData {
           Se requiere un nombre
         </div>
       </div>
-
       <div class="grid gap-2">
         <label for="email" class="text-sm font-medium">Email</label>
         <input
@@ -45,7 +44,6 @@ export interface UserFormData {
           Se requiere un email v&aacute;lido
         </div>
       </div>
-
       <div class="grid gap-2">
         <label for="role" class="text-sm font-medium">Rol</label>
         <select
@@ -59,7 +57,6 @@ export interface UserFormData {
           <option value="citizen">Ciudadano</option>
         </select>
       </div>
-
       <div class="flex justify-end gap-2 pt-4">
         <button
           type="button"
@@ -69,8 +66,8 @@ export interface UserFormData {
           Cancelar
         </button>
         <button
-          type="submit"
           ubDialogClose
+          type="submit"
           [disabled]="userForm.invalid"
           class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900"
         >
@@ -84,12 +81,11 @@ export class UserFormComponent implements OnInit {
   @Input() user: UserFormData = { name: '', email: '' };
   @Input() isEditMode = false;
   @Output() userSubmitted = new EventEmitter<UserFormData>();
-
   userForm: FormGroup;
 
   constructor(private fb: FormBuilder) {
     this.userForm = this.fb.group({
-      id: [''],
+      id: [null],
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       role: ['']
@@ -102,7 +98,14 @@ export class UserFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.userForm.valid) {
-      this.userSubmitted.emit(this.userForm.value);
+      const formData = this.userForm.value;
+
+      // For create operations, remove the id completely
+      if (!this.isEditMode || !formData.id) {
+        delete formData.id;
+      }
+
+      this.userSubmitted.emit(formData);
     }
   }
 }

@@ -15,16 +15,26 @@ export interface TableAction<T> {
   style?: string;
 }
 
+export interface Meta {
+  pagination: Pagination;
+  sort: Sort;
+}
+
 export interface Pagination {
   page: number;
-  pageSize: number;
+  limit: number;
   pageCount: number;
   total: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface Sort {
+  by: string;
+  direction: string;
 }
 
 export interface ApiResponse<T> {
   data: T[];
-  meta?: {
-    pagination: Pagination;
-  };
+  meta: Meta;
 }
