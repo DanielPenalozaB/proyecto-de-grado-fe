@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DropdownAlign, DropdownSide } from '@radix-ng/primitives/dropdown-menu';
@@ -29,6 +30,7 @@ export class TableComponent<T extends { id: number | string }> {
 
   selectedRows = new Set<T>();
 
+  readonly cn = cn;
   readonly DropdownSide = DropdownSide;
   readonly DropdownAlign = DropdownAlign;
 
