@@ -1,0 +1,117 @@
+<app-content-layout [title]="'Preguntas'" [description]="'Administra las preguntas del sistema'"
+  [actions]="contentActions">
+  <!-- Filters section above the table -->
+  <div class="mb-6 space-y-4">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <!-- Search input -->
+      <div class="relative flex-1">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <lucide-icon [img]="Search" class="w-4 h-4 text-gray-500"></lucide-icon>
+        </div>
+        <input type="text" [ngModel]="searchTerm" (ngModelChange)="searchSubject.next($event)"
+          placeholder="Buscar por enunciado, descripción o retroalimentación..."
+          class="flex h-10 w-full pl-10 rounded-md border border-input bg-background px-3 py-2 text-sm" />
+      </div>
+
+      <!-- Reset filters button -->
+      @if (searchTerm) {
+      <button (click)="resetFilters()"
+        class="inline-flex items-center justify-center h-10 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50">
+        <lucide-icon [img]="FunnelX" class="w-4 h-4 mr-2"></lucide-icon>
+        Limpiar
+      </button>
+      }
+    </div>
+
+    <!-- Active filters display -->
+    <div *ngIf="searchTerm" class="flex flex-wrap gap-2 text-sm">
+      <button (click)="searchTerm = ''; applyFilters()"
+        class="inline-flex gap-1 cursor-pointer items-center bg-gray-100 px-3 py-1 rounded-full ml-2 text-gray-500 hover:text-gray-700"
+        title="Limpiar búsqueda">
+        <span>Búsqueda: {{ searchTerm }}</span>
+        <lucide-icon [img]="FunnelX" class="w-3 h-3"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table component -->
+  <app-table [columns]="columns" [data]="questions" [actions]="tableActions" [pagination]="pagination"
+    [loading]="loading" (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
+    (limitChange)="onPageSizeChange($event)"></app-table>
+</app-content-layout>
+
+<!-- Create Question Dialog -->
+<ng-template #createDialog>
+  <div ubDialogContent class="max-h-[80vh] flex flex-col">
+    <div ubDialogHeader class="shrink-0">
+      <h2 ubDialogTitle>Crear Pregunta</h2>
+      <p ubDialogDescription>Añade una nueva pregunta al sistema</p>
+    </div>
+
+    <div ubDialogBody>
+      <app-question-form #createQuestionForm [isEditMode]="false" [question]="currentQuestion"
+        (questionSubmitted)="onCreateQuestion($event)"></app-question-form>
+    </div>
+
+    <div ubDialogFooter>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="createQuestionForm.submitForm()" [disabled]="createQuestionForm.form.invalid"
+        ubDialogClose>
+        Crear
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Edit Question Dialog -->
+<ng-template #editDialog>
+  <div ubDialogContent class="max-h-[80vh] flex flex-col">
+    <div ubDialogHeader class="shrink-0">
+      <h2 ubDialogTitle>Editar Pregunta</h2>
+      <p ubDialogDescription>Modifica los detalles de la pregunta</p>
+    </div>
+
+    <div ubDialogBody>
+      <app-question-form #editQuestionForm [isEditMode]="true" [question]="currentQuestion"
+        (questionSubmitted)="onUpdateQuestion($event)"></app-question-form>
+    </div>
+
+    <div ubDialogFooter>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="editQuestionForm.submitForm()" [disabled]="editQuestionForm.form.invalid"
+        ubDialogClose>
+        Actualizar
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Delete Question Dialog -->
+<ng-template #deleteDialog>
+  <div ubDialogContent class="max-h-[80vh] flex flex-col">
+    <div ubDialogHeader class="shrink-0">
+      <h2 ubDialogTitle>Eliminar Pregunta</h2>
+      <p ubDialogDescription>Confirma la eliminación de la pregunta</p>
+    </div>
+
+    <div class="overflow-y-auto flex-1">
+      <div class="border border-red-200! bg-red-50 p-4 rounded-md text-sm">
+        <p>Est&aacute;s a punto de eliminar la pregunta <b>{{ currentQuestion.statement }}</b>. Esta accion no se puede
+          deshacer.
+        </p>
+      </div>
+
+      <div ubDialogFooter class="shrink-0">
+        <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
+          ubDialogClose>
+          Cancelar
+        </button>
+        <button type="submit" ubDialogClose
+          class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600"
+          (click)="onDeleteQuestion(currentQuestion)">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>

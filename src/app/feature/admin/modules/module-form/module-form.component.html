@@ -1,0 +1,102 @@
+<form [formGroup]="moduleForm" (ngSubmit)="onSubmit()" class="space-y-4">
+  <div class="grid gap-2">
+    <label for="name" class="text-sm font-medium">Nombre</label>
+    <input type="text" id="name" formControlName="name"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+    @if (moduleForm.get('name')?.invalid && moduleForm.get('name')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (moduleForm.get('name')?.errors?.['required']) {
+      <span>Se requiere un nombre</span>
+      }
+      @if (moduleForm.get('name')?.errors?.['minlength']) {
+      <span>El nombre debe tener al menos 3 caracteres</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="description" class="text-sm font-medium">Descripción</label>
+    <textarea id="description" formControlName="description"
+      class="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"></textarea>
+    @if (moduleForm.get('description')?.invalid && moduleForm.get('description')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (moduleForm.get('description')?.errors?.['required']) {
+      <span>Se requiere una descripción</span>
+      }
+      @if (moduleForm.get('description')?.errors?.['minlength']) {
+      <span>La descripción debe tener al menos 10 caracteres</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="order" class="text-sm font-medium">Orden</label>
+    <input type="number" id="order" formControlName="order" min="1"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+    @if (moduleForm.get('order')?.invalid && moduleForm.get('order')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (moduleForm.get('order')?.errors?.['required']) {
+      <span>Se requiere un orden</span>
+      }
+      @if (moduleForm.get('order')?.errors?.['min']) {
+      <span>El orden debe ser al menos 1</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="points" class="text-sm font-medium">Puntos</label>
+    <input type="number" id="points" formControlName="points" min="0"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+    @if (moduleForm.get('points')?.invalid && moduleForm.get('points')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (moduleForm.get('points')?.errors?.['required']) {
+      <span>Se requiere un valor de puntos</span>
+      }
+      @if (moduleForm.get('points')?.errors?.['min']) {
+      <span>Los puntos no pueden ser negativos</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="status" class="text-sm font-medium">Estado</label>
+    <select id="status" formControlName="status"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [value]="ModuleStatus.DRAFT">Borrador</option>
+      <option [value]="ModuleStatus.PUBLISHED">Publicado</option>
+      <option [value]="ModuleStatus.ARCHIVED">Archivado</option>
+    </select>
+  </div>
+
+  <div class="grid gap-2">
+    <label for="guideId" class="text-sm font-medium">Guía</label>
+    @if (loadingGuides) {
+    <div class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm items-center">
+      <span class="text-gray-500">Cargando guías...</span>
+    </div>
+    } @else {
+    <select id="guideId" formControlName="guideId"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [ngValue]="null" disabled>Selecciona una guía</option>
+      @for (guide of guides; track guide.id) {
+      <option [ngValue]="guide.id">{{ guide.name }}</option>
+      }
+    </select>
+    }
+    @if (moduleForm.get('guideId')?.invalid && moduleForm.get('guideId')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (moduleForm.get('guideId')?.errors?.['required']) {
+      <span>Se requiere una guía</span>
+      }
+      @if (moduleForm.get('guideId')?.errors?.['min']) {
+      <span>Selecciona una guía válida</span>
+      }
+    </div>
+    }
+  </div>
+</form>

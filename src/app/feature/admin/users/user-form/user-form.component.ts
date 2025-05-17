@@ -1,4 +1,3 @@
-import { UbDialogCloseDirective } from '@/components/ui/dialog';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,8 +14,7 @@ export interface UserFormData {
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    UbDialogCloseDirective
+    ReactiveFormsModule
   ],
   template: `
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -57,23 +55,6 @@ export interface UserFormData {
           <option value="citizen">Ciudadano</option>
         </select>
       </div>
-      <div class="flex justify-end gap-2 pt-4">
-        <button
-          type="button"
-          ubDialogClose
-          class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
-        >
-          Cancelar
-        </button>
-        <button
-          ubDialogClose
-          type="submit"
-          [disabled]="userForm.invalid"
-          class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900"
-        >
-          {{ isEditMode ? 'Actualizar' : 'Crear' }}
-        </button>
-      </div>
     </form>
   `
 })
@@ -107,5 +88,13 @@ export class UserFormComponent implements OnInit {
 
       this.userSubmitted.emit(formData);
     }
+  }
+
+  get form(): FormGroup {
+    return this.userForm;
+  }
+
+  submitForm(): void {
+    this.onSubmit();
   }
 }

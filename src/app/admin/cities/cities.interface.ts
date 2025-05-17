@@ -1,7 +1,4 @@
-export enum Languages {
-  EN = 'en',
-  ES = 'es'
-}
+import { Languages } from "@/common/common.interface";
 
 export interface City {
   id: number;

@@ -1,5 +1,4 @@
-import { CityFormComponent, CityFormData } from '@/app/feature/admin/cities/city-form.component';
-import { Languages } from '@/common/common.interface';
+import { QuestionFormComponent, QuestionFormData } from '@/app/feature/admin/questions/question-form/question-form.component';
 import {
   UbDialogCloseDirective,
   UbDialogContentDirective,
@@ -12,17 +11,18 @@ import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FunnelX, LucideAngularModule, MapPin, Plus, Search, Trash2 } from 'lucide-angular';
+import { FunnelX, LucideAngularModule, Plus, Search, Trash2 } from 'lucide-angular';
 import { toast } from "ngx-sonner";
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ContentLayoutComponent } from '../../shared/layout/content-layout/content-layout.component';
 import { TableComponent } from "../../shared/ui/table/table.component";
 import { Pagination, TableAction, TableColumn } from '../../shared/ui/table/table.interfaces';
-import { City } from './cities.interface';
-import { CitiesService, CitySearchParams } from './cities.service';
+import { ModulesService } from '../modules/modules.service';
+import { BlockType, DynamicType, Question, QuestionType } from './questions.interface';
+import { QuestionSearchParams, QuestionsService } from './questions.service';
 
 @Component({
-  selector: 'app-cities',
+  selector: 'app-questions',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,7 +30,7 @@ import { CitiesService, CitySearchParams } from './cities.service';
     ContentLayoutComponent,
     TableComponent,
     LucideAngularModule,
-    CityFormComponent,
+    QuestionFormComponent,
     UbDialogContentDirective,
     UbDialogDescriptionDirective,
     UbDialogFooterDirective,
@@ -38,31 +38,39 @@ import { CitiesService, CitySearchParams } from './cities.service';
     UbDialogTitleDirective,
     UbDialogCloseDirective
   ],
-  templateUrl: './cities.component.html',
-  styleUrls: ['./cities.component.css']
+  templateUrl: './questions.component.html',
+  styleUrls: ['./questions.component.css']
 })
-export class CitiesComponent implements OnInit, OnDestroy {
+export class QuestionsComponent implements OnInit, OnDestroy {
   @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
   @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
-    @ViewChild('createCityForm') createCityForm!: CityFormComponent;
-    @ViewChild('editCityForm') editCityForm!: CityFormComponent;
+  @ViewChild('createQuestionForm') createQuestionForm!: QuestionFormComponent;
+  @ViewChild('editQuestionForm') editQuestionForm!: QuestionFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;
-  readonly MapPin = MapPin;
 
-  cities: City[] = [];
+  questions: Question[] = [];
   loading = false;
-  currentCity: CityFormData = { name: '' };
+  currentQuestion: QuestionFormData = {
+    id: undefined,
+    blockType: BlockType.TEXT,
+    statement: '',
+    description: '',
+    resourceUrl: '',
+    dynamicType: DynamicType.MULTIPLE_CHOICE,
+    questionType: QuestionType.KNOWLEDGE_CHECK,
+    feedback: '',
+    moduleId: 0
+  };
 
   searchSubject = new Subject<string>();
   searchTerm = '';
-  filterParams: CitySearchParams = {};
+  filterParams: QuestionSearchParams = {};
 
   sortableFields: Record<string, string> = {
-    'name': 'Nombre',
-    'rainfall': 'Pluviosidad',
+    'id': 'ID',
     'createdAt': 'Fecha creación',
     'updatedAt': 'Fecha actualización'
   };
@@ -77,28 +85,63 @@ export class CitiesComponent implements OnInit, OnDestroy {
   };
 
   columns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
+    { key: 'id', label: 'ID' },
     {
-      key: 'description',
-      label: 'Descripción',
+      key: 'statement',
+      label: 'Enunciado',
       class: 'w-2xs!',
       truncate: true,
     },
     {
-      key: 'rainfall',
-      label: 'Pluviosidad (mm)',
+      key: 'blockType',
+      label: 'Tipo de Bloque',
       type: 'badge',
-      format: (value: unknown) => value ? `${value} mm` : 'N/A'
-    },
-    {
-      key: 'language',
-      label: 'Idioma',
-      format: <Languages>(value: Languages) => {
+      format: <BlockType>(value: BlockType) => {
         switch (value) {
-          case Languages.ES: return 'Español';
-          case Languages.EN: return 'English';
+          case BlockType.TEXT: return 'Texto';
+          case BlockType.VIDEO: return 'Video';
+          case BlockType.IMAGE: return 'Imagen';
+          case BlockType.QUESTION: return 'Pregunta';
           default: return 'N/A';
         }
+      }
+    },
+    {
+      key: 'dynamicType',
+      label: 'Tipo Dinámico',
+      type: 'badge',
+      format: <DynamicType>(value: DynamicType) => {
+        switch (value) {
+          case DynamicType.MULTIPLE_CHOICE: return 'Opción múltiple';
+          case DynamicType.SINGLE_ANSWER: return 'Respuesta única';
+          case DynamicType.DRAG_AND_DROP: return 'Arrastrar y soltar';
+          case DynamicType.TEXT_INPUT: return 'Entrada de texto';
+          case DynamicType.VIDEO_RESOURCE: return 'Recurso de video';
+          default: return 'N/A';
+        }
+      }
+    },
+    {
+      key: 'questionType',
+      label: 'Tipo de Pregunta',
+      type: 'badge',
+      format: <QuestionType>(value: QuestionType) => {
+        switch (value) {
+          case QuestionType.KNOWLEDGE_CHECK: return 'Verificación';
+          case QuestionType.PRACTICE: return 'Práctica';
+          case QuestionType.ASSESSMENT: return 'Evaluación';
+          case QuestionType.REFLECTION: return 'Reflexión';
+          default: return 'N/A';
+        }
+      }
+    },
+    {
+      key: 'moduleId',
+      label: 'ID Módulo',
+      format: (value: unknown) => {
+        if (!value) return 'N/A';
+        const moduleId = value as number;
+        return `<a href="/admin/modules/${moduleId}" class="text-teal-500 hover:text-teal-600 hover:underline">#${moduleId}</a>`;
       }
     },
     {
@@ -115,10 +158,10 @@ export class CitiesComponent implements OnInit, OnDestroy {
     }
   ];
 
-  tableActions: TableAction<City>[] = [
+  tableActions: TableAction<Question>[] = [
     {
       label: 'Editar',
-      icon: MapPin,
+      icon: Plus,
       action: (row) => this.openEditDialog(row),
       style: 'text-primary-600 hover:text-primary-900'
     },
@@ -132,7 +175,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   contentActions = [
     {
-      label: 'Crear ciudad',
+      label: 'Crear pregunta',
       icon: Plus,
       action: () => this.openCreateDialog(),
       style: 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -140,8 +183,9 @@ export class CitiesComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private citiesService: CitiesService,
-    private dialogService: DialogService
+    private questionsService: QuestionsService,
+    private dialogService: DialogService,
+    private modulesService: ModulesService
   ) { }
 
   ngOnInit(): void {
@@ -153,17 +197,17 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.applyFilters();
     });
 
-    this.loadCities();
+    this.loadQuestions();
   }
 
   ngOnDestroy(): void {
     this.searchSubject.complete();
   }
 
-  loadCities(): void {
+  loadQuestions(): void {
     this.loading = true;
 
-    const params: CitySearchParams = {
+    const params: QuestionSearchParams = {
       ...this.filterParams,
       page: this.pagination.page,
       limit: this.pagination.limit
@@ -173,9 +217,9 @@ export class CitiesComponent implements OnInit, OnDestroy {
       params.search = this.searchTerm.trim();
     }
 
-    this.citiesService.getCities(params).subscribe({
+    this.questionsService.getQuestions(params).subscribe({
       next: (response) => {
-        this.cities = response.data;
+        this.questions = response.data;
         if (response.meta) {
           this.pagination = {
             page: response.meta.pagination.page || 1,
@@ -189,7 +233,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        toast.error('Error al obtener las ciudades. Por favor, inténtalo de nuevo.');
+        toast.error('Error al obtener las preguntas. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
@@ -201,106 +245,116 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.filterParams.sortDirection =
         this.filterParams.sortDirection === 'ASC' ? 'DESC' : 'ASC';
     } else {
-      this.filterParams.sortBy = column as CitySearchParams['sortBy'];
+      this.filterParams.sortBy = column as QuestionSearchParams['sortBy'];
       this.filterParams.sortDirection = 'ASC';
     }
 
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadQuestions();
   }
 
   resetFilters(): void {
     this.filterParams = {};
     this.searchTerm = '';
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadQuestions();
     toast.success('Filtros restablecidos');
   }
 
   applyFilters(): void {
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadQuestions();
   }
 
   openCreateDialog(): void {
-    this.currentCity = { name: '' };
+    this.currentQuestion = {
+      id: undefined,
+      blockType: BlockType.TEXT,
+      statement: '',
+      description: '',
+      resourceUrl: '',
+      dynamicType: DynamicType.MULTIPLE_CHOICE,
+      questionType: QuestionType.KNOWLEDGE_CHECK,
+      feedback: '',
+      moduleId: 0
+    };
     this.dialogService.open(this.createDialogTpl);
   }
 
-  openEditDialog(city: City): void {
-    this.currentCity = { ...city };
+  openEditDialog(question: Question): void {
+    this.currentQuestion = { ...question };
     this.dialogService.open(this.editDialogTpl);
   }
 
-  openDeleteDialog(city: City): void {
-    this.currentCity = { ...city };
+  openDeleteDialog(question: Question): void {
+    this.currentQuestion = { ...question };
     this.dialogService.open(this.deleteDialogTpl);
   }
 
-  onCreateCity(cityData: CityFormData): void {
+  onCreateQuestion(questionData: QuestionFormData): void {
     this.loading = true;
-    this.citiesService.createCity(cityData).subscribe({
+    this.questionsService.createQuestion(questionData).subscribe({
       next: (response) => {
-        this.cities = [response.data, ...this.cities];
+        this.questions = [response.data, ...this.questions];
         this.pagination.total++;
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad creada exitosamente');
+        toast.success(response.message || 'Pregunta creada exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al crear la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al crear la pregunta. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onUpdateCity(cityData: CityFormData): void {
-    if (!cityData.id) return;
+  onUpdateQuestion(questionData: QuestionFormData): void {
+    if (!questionData.id) return;
 
     this.loading = true;
-    this.citiesService.updateCity(cityData.id, cityData).subscribe({
+    this.questionsService.updateQuestion(questionData.id, questionData).subscribe({
       next: (response) => {
-        this.cities = this.cities.map(c =>
-          c.id === response.data.id ? response.data : c
+        this.questions = this.questions.map(q =>
+          q.id === response.data.id ? response.data : q
         );
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad actualizada exitosamente');
+        toast.success(response.message || 'Pregunta actualizada exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al actualizar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al actualizar la pregunta. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onDeleteCity(cityData: CityFormData): void {
-    if (!cityData.id) {
-      toast.error('No se puede eliminar la ciudad: ID no válido');
+  onDeleteQuestion(questionData: QuestionFormData): void {
+    if (!questionData.id) {
+      toast.error('No se puede eliminar la pregunta: ID no válido');
       return;
     }
 
     this.loading = true;
     this.dialogService.close();
 
-    this.citiesService.deleteCity(cityData.id).subscribe({
+    this.questionsService.deleteQuestion(questionData.id).subscribe({
       next: (response) => {
-        this.cities = this.cities.filter(c => c.id !== cityData.id);
+        this.questions = this.questions.filter(q => q.id !== questionData.id);
         this.pagination.total--;
-        toast.success(response.message || 'Ciudad eliminada exitosamente');
+        toast.success(response.message || 'Pregunta eliminada exitosamente');
         this.loading = false;
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al eliminar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al eliminar la pregunta. Por favor, inténtalo de nuevo.');
         console.error(err);
         this.loading = false;
       }
     });
   }
 
-  onAction(event: { action: string; row: City }): void {
+  onAction(event: { action: string; row: Question }): void {
     if (event.action === 'Editar') {
       this.openEditDialog(event.row);
     } else if (event.action === 'Eliminar') {
@@ -310,12 +364,12 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   onPageChange(page: number): void {
     this.pagination.page = page;
-    this.loadCities();
+    this.loadQuestions();
   }
 
   onPageSizeChange(size: number): void {
     this.pagination.limit = size;
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadQuestions();
   }
 }

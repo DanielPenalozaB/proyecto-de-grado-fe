@@ -28,7 +28,7 @@
             <!-- Column Headers -->
             @for (column of columns; track column.key) {
             <th
-              [ngClass]="cn('h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]', column.class)"
+              [ngClass]="cn('h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px] whitespace-nowrap', column.class)"
               [style.width]="column.width">
               {{ column.label }}
             </th>
@@ -59,13 +59,14 @@
 
             <!-- Data Cells -->
             @for (column of columns; track column.key) {
-            <td [ngClass]="cn('p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]', { 'line-clamp-1 h-8 mt-1': column.truncate })">
+            <td
+              [ngClass]="cn('p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]', { 'line-clamp-1 h-8 mt-1': column.truncate })">
               @if (column.type === 'badge') {
               <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
-                {{ formatCellValue(row, column) }}
+                <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
               </app-badge>
               } @else {
-              {{ formatCellValue(row, column) }}
+              <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
               }
             </td>
             }
@@ -152,3 +153,7 @@
   </div>
   }
 </div>
+
+<ng-template #htmlTemplate let-element>
+  <div [innerHTML]="element.outerHTML"></div>
+</ng-template>

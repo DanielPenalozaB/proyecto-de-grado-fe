@@ -1,5 +1,4 @@
-<app-content-layout [title]="'Ciudades'" [description]="'Administra las ciudades del sistema'"
-  [actions]="contentActions">
+<app-content-layout [title]="'Módulos'" [description]="'Administra los módulos del sistema'" [actions]="contentActions">
   <!-- Filters section above the table -->
   <div class="mb-6 space-y-4">
     <div class="flex flex-col sm:flex-row gap-4">
@@ -9,7 +8,7 @@
           <lucide-icon [img]="Search" class="w-4 h-4 text-gray-500"></lucide-icon>
         </div>
         <input type="text" [ngModel]="searchTerm" (ngModelChange)="searchSubject.next($event)"
-          placeholder="Buscar por nombre, descripción o idioma..."
+          placeholder="Buscar por nombre o descripción..."
           class="flex h-10 w-full pl-10 rounded-md border border-input bg-background px-3 py-2 text-sm" />
       </div>
 
@@ -35,26 +34,27 @@
   </div>
 
   <!-- Table component -->
-  <app-table [columns]="columns" [data]="cities" [actions]="tableActions" [pagination]="pagination" [loading]="loading"
+  <app-table [columns]="columns" [data]="modules" [actions]="tableActions" [pagination]="pagination" [loading]="loading"
     (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
     (limitChange)="onPageSizeChange($event)"></app-table>
 </app-content-layout>
 
-<!-- Create City Dialog -->
+<!-- Create Module Dialog -->
 <ng-template #createDialog>
   <div ubDialogContent>
     <div ubDialogHeader>
-      <h2 ubDialogTitle>Crear Ciudad</h2>
-      <p ubDialogDescription>Añade una nueva ciudad al sistema</p>
+      <h2 ubDialogTitle>Crear Módulo</h2>
+      <p ubDialogDescription>Añade un nuevo módulo al sistema</p>
     </div>
 
     <div ubDialogBody>
-      <app-city-form #createCityForm [isEditMode]="false" [city]="currentCity" (citySubmitted)="onCreateCity($event)"></app-city-form>
+      <app-module-form #createModuleForm [isEditMode]="false" [module]="currentModule"
+        (moduleSubmitted)="onCreateModule($event)"></app-module-form>
     </div>
 
     <div ubDialogFooter>
       <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="createCityForm.submitForm()" [disabled]="createCityForm.form.invalid"
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="createModuleForm.submitForm()" [disabled]="createModuleForm.form.invalid"
         ubDialogClose>
         Crear
       </button>
@@ -62,37 +62,39 @@
   </div>
 </ng-template>
 
-<!-- Edit City Dialog -->
+<!-- Edit Module Dialog -->
 <ng-template #editDialog>
   <div ubDialogContent>
     <div ubDialogHeader>
-      <h2 ubDialogTitle>Editar Ciudad</h2>
-      <p ubDialogDescription>Modifica los detalles de la ciudad</p>
+      <h2 ubDialogTitle>Editar Módulo</h2>
+      <p ubDialogDescription>Modifica los detalles del módulo</p>
     </div>
 
     <div ubDialogBody>
-      <app-city-form #editCityForm [isEditMode]="true" [city]="currentCity" (citySubmitted)="onUpdateCity($event)"></app-city-form>
+      <app-module-form #editModuleForm [isEditMode]="true" [module]="currentModule"
+        (moduleSubmitted)="onUpdateModule($event)"></app-module-form>
     </div>
 
     <div ubDialogFooter>
       <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="editCityForm.submitForm()" [disabled]="editCityForm.form.invalid" ubDialogClose>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="editModuleForm.submitForm()" [disabled]="editModuleForm.form.invalid"
+        ubDialogClose>
         Actualizar
       </button>
     </div>
   </div>
 </ng-template>
 
-<!-- Delete City Dialog -->
+<!-- Delete Module Dialog -->
 <ng-template #deleteDialog>
   <div ubDialogContent>
     <div ubDialogHeader>
-      <h2 ubDialogTitle>Eliminar Ciudad</h2>
-      <p ubDialogDescription>Confirma la eliminación de la ciudad</p>
+      <h2 ubDialogTitle>Eliminar Módulo</h2>
+      <p ubDialogDescription>Confirma la eliminación del módulo</p>
     </div>
 
     <div class="border border-red-200! bg-red-50 p-4 rounded-md text-sm">
-      <p>Est&aacute;s a punto de eliminar la ciudad <b>{{ currentCity.name }}</b>. Esta accion no se puede deshacer.
+      <p>Est&aacute;s a punto de eliminar el módulo <b>{{ currentModule.name }}</b>. Esta accion no se puede deshacer.
       </p>
     </div>
 
@@ -103,7 +105,7 @@
       </button>
       <button type="submit" ubDialogClose
         class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600"
-        (click)="onDeleteCity(currentCity)">
+        (click)="onDeleteModule(currentModule)">
         Eliminar
       </button>
     </div>

@@ -32,24 +32,5 @@
       </div>
       <!-- Add more fields as needed -->
     </div>
-
-    <div ubDialogFooter class="flex justify-end gap-2 mt-4">
-      <button
-        type="button"
-        ubButton
-        variant="outline"
-        (click)="onCancel()"
-      >
-        Cancel
-      </button>
-      <button
-        type="button"
-        ubButton
-        (click)="onSubmit()"
-        [disabled]="!user.name || !user.email"
-      >
-        {{ isEditMode ? 'Update' : 'Create' }}
-      </button>
-    </div>
   </div>
 </div>

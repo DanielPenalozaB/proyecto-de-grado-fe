@@ -35,8 +35,3 @@ export interface Sort {
   by: string;
   direction: string;
 }
-
-export interface ApiResponse<T> {
-  data: T[];
-  meta: Meta;
-}

@@ -3,7 +3,7 @@
 /* eslint-disable @angular-eslint/directive-selector */
 import type { TemplateRef } from '@angular/core'
 import { Component, computed, Directive, effect, inject, input } from '@angular/core'
-import { NgIconComponent, provideIcons } from '@ng-icons/core'
+import { provideIcons } from '@ng-icons/core'
 import { lucideX } from '@ng-icons/lucide'
 import type { RdxDialogConfig } from '@radix-ng/primitives/dialog'
 
@@ -15,6 +15,7 @@ import {
   RdxDialogTitleDirective,
   RdxDialogTriggerDirective
 } from '@radix-ng/primitives/dialog'
+import { LucideAngularModule, X } from 'lucide-angular'
 
 // Re-export RdxDialogService for easier access
 export { RdxDialogService } from '@radix-ng/primitives/dialog'
@@ -62,7 +63,7 @@ export class UbDialogTriggerDirective {
 @Component({
   standalone: true,
   selector: '[ubDialogContent]',
-  imports: [RdxDialogCloseDirective, NgIconComponent],
+  imports: [RdxDialogCloseDirective, LucideAngularModule],
   host: {
     '[class]': 'computedClass()',
   },
@@ -75,8 +76,8 @@ export class UbDialogTriggerDirective {
   template: `
     <ng-content />
 
-    <button class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4" rdxDialogClose>
-      <ng-icon name="lucideX" />
+    <button class="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-6 right-6 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 size-5" rdxDialogClose>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x size-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       <span class="sr-only">Close</span>
     </button>
   `,
@@ -84,6 +85,7 @@ export class UbDialogTriggerDirective {
 export class UbDialogContentDirective {
   class = input<string>()
   computedClass = computed(() => cn('bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg', this.class()))
+  X = X;
 }
 
 @Directive({
