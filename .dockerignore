@@ -1,7 +1,11 @@
 node_modules
-dist
+npm-debug.log
 .git
 .gitignore
-Dockerfile
-.dockerignore
-*.md
+README.md
+.vscode
+e2e
+coverage
+.editorconfig
+.angular
+dist
