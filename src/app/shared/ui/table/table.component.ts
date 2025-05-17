@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DropdownAlign, DropdownSide } from '@radix-ng/primitives/dropdown-menu';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, LucideAngularModule } from 'lucide-angular';
 import { BadgeComponent } from '../badge/badge.component';
@@ -39,6 +40,8 @@ export class TableComponent<T extends { id: number | string }> {
   readonly ChevronRight = ChevronRight;
   readonly ChevronsLeft = ChevronsLeft;
   readonly ChevronsRight = ChevronsRight;
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   /**
    * Handles dropdown menu actions
@@ -85,11 +88,11 @@ export class TableComponent<T extends { id: number | string }> {
   }
 
   formatCellValue(row: T, column: TableColumn): string {
-    if (column.format) {
-      return column.format(row[column.key as keyof T]);
-    }
-
     const value = row[column.key as keyof T];
+
+    if (column.format) {
+      return column.format(value);
+    }
 
     switch (column.type) {
       case 'date':
@@ -99,5 +102,9 @@ export class TableComponent<T extends { id: number | string }> {
       default:
         return value as unknown as string;
     }
+  }
+
+  safeHtml(html: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 }

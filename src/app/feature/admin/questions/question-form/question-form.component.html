@@ -1,0 +1,121 @@
+<form [formGroup]="questionForm" (ngSubmit)="onSubmit()" class="space-y-4">
+  <div class="grid gap-2">
+    <label for="blockType" class="text-sm font-medium">Tipo de Bloque</label>
+    <select id="blockType" formControlName="blockType"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [value]="BlockType.TEXT">Texto</option>
+      <option [value]="BlockType.VIDEO">Video</option>
+      <option [value]="BlockType.IMAGE">Imagen</option>
+      <option [value]="BlockType.QUESTION">Pregunta</option>
+    </select>
+    @if (questionForm.get('blockType')?.invalid && questionForm.get('blockType')?.touched) {
+    <div class="text-red-500 text-xs">
+      Se requiere un tipo de bloque
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="statement" class="text-sm font-medium">Enunciado</label>
+    <textarea id="statement" formControlName="statement"
+      class="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"></textarea>
+    @if (questionForm.get('statement')?.invalid && questionForm.get('statement')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (questionForm.get('statement')?.errors?.['required']) {
+      <span>Se requiere un enunciado</span>
+      }
+      @if (questionForm.get('statement')?.errors?.['minlength']) {
+      <span>El enunciado debe tener al menos 5 caracteres</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="description" class="text-sm font-medium">Descripción</label>
+    <textarea id="description" formControlName="description"
+      class="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"></textarea>
+  </div>
+
+  <div class="grid gap-2">
+    <label for="resourceUrl" class="text-sm font-medium">URL de Recurso</label>
+    <input type="url" id="resourceUrl" formControlName="resourceUrl"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+  </div>
+
+  <div class="grid gap-2">
+    <label for="dynamicType" class="text-sm font-medium">Tipo Dinámico</label>
+    <select id="dynamicType" formControlName="dynamicType"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [value]="DynamicType.MULTIPLE_CHOICE">Opción múltiple</option>
+      <option [value]="DynamicType.SINGLE_ANSWER">Respuesta única</option>
+      <option [value]="DynamicType.DRAG_AND_DROP">Arrastrar y soltar</option>
+      <option [value]="DynamicType.TEXT_INPUT">Entrada de texto</option>
+      <option [value]="DynamicType.VIDEO_RESOURCE">Recurso de video</option>
+    </select>
+    @if (questionForm.get('dynamicType')?.invalid && questionForm.get('dynamicType')?.touched) {
+    <div class="text-red-500 text-xs">
+      Se requiere un tipo dinámico
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="questionType" class="text-sm font-medium">Tipo de Pregunta</label>
+    <select id="questionType" formControlName="questionType"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [value]="QuestionType.KNOWLEDGE_CHECK">Verificación de conocimiento</option>
+      <option [value]="QuestionType.PRACTICE">Práctica</option>
+      <option [value]="QuestionType.ASSESSMENT">Evaluación</option>
+      <option [value]="QuestionType.REFLECTION">Reflexión</option>
+    </select>
+    @if (questionForm.get('questionType')?.invalid && questionForm.get('questionType')?.touched) {
+    <div class="text-red-500 text-xs">
+      Se requiere un tipo de pregunta
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="feedback" class="text-sm font-medium">Retroalimentación</label>
+    <textarea id="feedback" formControlName="feedback"
+      class="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"></textarea>
+    @if (questionForm.get('feedback')?.invalid && questionForm.get('feedback')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (questionForm.get('feedback')?.errors?.['required']) {
+      <span>Se requiere retroalimentación</span>
+      }
+      @if (questionForm.get('feedback')?.errors?.['minlength']) {
+      <span>La retroalimentación debe tener al menos 10 caracteres</span>
+      }
+    </div>
+    }
+  </div>
+
+  <div class="grid gap-2">
+    <label for="moduleId" class="text-sm font-medium">Módulo</label>
+    @if (loadingModules) {
+    <div class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm items-center">
+      <span class="text-gray-500">Cargando módulos...</span>
+    </div>
+    } @else {
+    <select id="moduleId" formControlName="moduleId"
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+      <option [ngValue]="null" disabled>Selecciona un módulo</option>
+      @for (module of modules; track module.id) {
+      <option [ngValue]="module.id">{{ module.name }}</option>
+      }
+    </select>
+    }
+    @if (questionForm.get('moduleId')?.invalid && questionForm.get('moduleId')?.touched) {
+    <div class="text-red-500 text-xs">
+      @if (questionForm.get('moduleId')?.errors?.['required']) {
+      <span>Se requiere un módulo</span>
+      }
+      @if (questionForm.get('moduleId')?.errors?.['min']) {
+      <span>Selecciona un módulo válido</span>
+      }
+    </div>
+    }
+  </div>
+</form>

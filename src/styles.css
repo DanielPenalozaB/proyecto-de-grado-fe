@@ -123,17 +123,103 @@
   }
 }
 
-/* styles.css or your global styles file */
-[ubDialogContent] {
-  background-color: white !important;
-  border-radius: 0.5rem !important;
-  padding: 1.5rem !important;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1) !important;
-}
+/* ==================== */
+/* Dialog Scroll Styles */
+/* ==================== */
+
+/* Dialog overlay container */
 
 .dialog-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cdk-overlay-pane.dialog {
+  position: absolute!;
+  top: 50%!;
+  left: 50%!;
+  transform: translate(-50%, -50%)!;
+  width: 100%!;
+  max-width: 448px!;
+}
+
+/* Dialog content container */
+[ubDialogContent] {
+  --dialog-max-height: min(80vh, 800px);
+  --dialog-max-width: min(90vw, 600px);
+
+  display: flex;
+  flex-direction: column;
+  max-height: var(--dialog-max-height);
+  max-width: var(--dialog-max-width);
+  width: 100%;
+  background-color: white !important;
+  border-radius: var(--radius) !important;
+  padding: 0 !important;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
+}
+
+/* Dialog header */
+[ubDialogHeader] {
+  padding: 1.5rem 1.5rem 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Dialog title */
+[ubDialogTitle] {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Dialog description */
+[ubDialogDescription] {
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Scrollable content area */
+[ubDialogBody] {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+/* Custom scrollbar for Webkit browsers */
+[ubDialogBody]::-webkit-scrollbar {
+  width: 8px;
+}
+
+[ubDialogBody]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[ubDialogBody]::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 4px;
+}
+
+/* Dialog footer */
+[ubDialogFooter] {
+  padding: 1rem 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Form inside dialog */
+[ubDialogContent] form {
+  padding-bottom: 1rem;
 }

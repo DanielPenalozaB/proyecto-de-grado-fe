@@ -63,7 +63,17 @@
       <p ubDialogDescription>Añade un nuevo usuario al sistema</p>
     </div>
 
-    <app-user-form [isEditMode]="false" [user]="currentUser" (userSubmitted)="onCreateUser($event)"></app-user-form>
+    <div ubDialogBody>
+      <app-user-form #createUserForm [isEditMode]="false" [user]="currentUser" (userSubmitted)="onCreateUser($event)"></app-user-form>
+    </div>
+
+    <div ubDialogFooter>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="createUserForm.submitForm()" [disabled]="createUserForm.form.invalid"
+        ubDialogClose>
+        Crear
+      </button>
+    </div>
   </div>
 </ng-template>
 
@@ -75,7 +85,16 @@
       <p ubDialogDescription>Modifica los detalles del usuario</p>
     </div>
 
-    <app-user-form [isEditMode]="true" [user]="currentUser" (userSubmitted)="onUpdateUser($event)"></app-user-form>
+    <div ubDialogBody>
+      <app-user-form #editUserForm [isEditMode]="true" [user]="currentUser" (userSubmitted)="onUpdateUser($event)"></app-user-form>
+    </div>
+
+    <div ubDialogFooter>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="editUserForm.submitForm()" [disabled]="editUserForm.form.invalid" ubDialogClose>
+        Actualizar
+      </button>
+    </div>
   </div>
 </ng-template>
 

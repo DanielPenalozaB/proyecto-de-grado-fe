@@ -1,5 +1,4 @@
-import { CityFormComponent, CityFormData } from '@/app/feature/admin/cities/city-form.component';
-import { Languages } from '@/common/common.interface';
+import { ModuleFormComponent, ModuleFormData } from '@/app/feature/admin/modules/module-form/module-form.component';
 import {
   UbDialogCloseDirective,
   UbDialogContentDirective,
@@ -12,17 +11,17 @@ import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FunnelX, LucideAngularModule, MapPin, Plus, Search, Trash2 } from 'lucide-angular';
+import { FunnelX, LucideAngularModule, Plus, Search, Trash2 } from 'lucide-angular';
 import { toast } from "ngx-sonner";
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ContentLayoutComponent } from '../../shared/layout/content-layout/content-layout.component';
 import { TableComponent } from "../../shared/ui/table/table.component";
 import { Pagination, TableAction, TableColumn } from '../../shared/ui/table/table.interfaces';
-import { City } from './cities.interface';
-import { CitiesService, CitySearchParams } from './cities.service';
+import { Module, ModuleStatus } from './modules.interface';
+import { ModuleSearchParams, ModulesService } from './modules.service';
 
 @Component({
-  selector: 'app-cities',
+  selector: 'app-modules',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,7 +29,7 @@ import { CitiesService, CitySearchParams } from './cities.service';
     ContentLayoutComponent,
     TableComponent,
     LucideAngularModule,
-    CityFormComponent,
+    ModuleFormComponent,
     UbDialogContentDirective,
     UbDialogDescriptionDirective,
     UbDialogFooterDirective,
@@ -38,31 +37,39 @@ import { CitiesService, CitySearchParams } from './cities.service';
     UbDialogTitleDirective,
     UbDialogCloseDirective
   ],
-  templateUrl: './cities.component.html',
-  styleUrls: ['./cities.component.css']
+  templateUrl: './modules.component.html',
+  styleUrls: ['./modules.component.css']
 })
-export class CitiesComponent implements OnInit, OnDestroy {
+export class ModulesComponent implements OnInit, OnDestroy {
   @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
   @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
-    @ViewChild('createCityForm') createCityForm!: CityFormComponent;
-    @ViewChild('editCityForm') editCityForm!: CityFormComponent;
+  @ViewChild('createModuleForm') createModuleForm!: ModuleFormComponent;
+  @ViewChild('editModuleForm') editModuleForm!: ModuleFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;
-  readonly MapPin = MapPin;
 
-  cities: City[] = [];
+  modules: Module[] = [];
   loading = false;
-  currentCity: CityFormData = { name: '' };
+  currentModule: ModuleFormData = {
+    id: undefined,
+    name: '',
+    description: '',
+    order: 1,
+    points: 0,
+    status: ModuleStatus.DRAFT,
+    guideId: 0
+  };
 
   searchSubject = new Subject<string>();
   searchTerm = '';
-  filterParams: CitySearchParams = {};
+  filterParams: ModuleSearchParams = {};
 
   sortableFields: Record<string, string> = {
     'name': 'Nombre',
-    'rainfall': 'Pluviosidad',
+    'order': 'Orden',
+    'points': 'Puntos',
     'createdAt': 'Fecha creación',
     'updatedAt': 'Fecha actualización'
   };
@@ -85,20 +92,37 @@ export class CitiesComponent implements OnInit, OnDestroy {
       truncate: true,
     },
     {
-      key: 'rainfall',
-      label: 'Pluviosidad (mm)',
+      key: 'order',
+      label: 'Orden',
       type: 'badge',
-      format: (value: unknown) => value ? `${value} mm` : 'N/A'
+      format: (value: unknown) => value ? `#${value}` : 'N/A'
     },
     {
-      key: 'language',
-      label: 'Idioma',
-      format: <Languages>(value: Languages) => {
+      key: 'points',
+      label: 'Puntos',
+      type: 'badge',
+      format: (value: unknown) => value ? `${value} pts` : 'N/A'
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      type: 'badge',
+      format: <ModuleStatus>(value: ModuleStatus) => {
         switch (value) {
-          case Languages.ES: return 'Español';
-          case Languages.EN: return 'English';
+          case ModuleStatus.DRAFT: return 'Borrador';
+          case ModuleStatus.PUBLISHED: return 'Publicado';
+          case ModuleStatus.ARCHIVED: return 'Archivado';
           default: return 'N/A';
         }
+      }
+    },
+    {
+      key: 'guideId',
+      label: 'ID Guía',
+      format: (value: unknown) => {
+        if (!value) return 'N/A';
+        const guideId = value as number;
+        return `<a href="/admin/guides/${guideId}" class="text-teal-500 hover:text-teal-600 hover:underline">#${guideId}</a>`;
       }
     },
     {
@@ -115,10 +139,10 @@ export class CitiesComponent implements OnInit, OnDestroy {
     }
   ];
 
-  tableActions: TableAction<City>[] = [
+  tableActions: TableAction<Module>[] = [
     {
       label: 'Editar',
-      icon: MapPin,
+      icon: Plus,
       action: (row) => this.openEditDialog(row),
       style: 'text-primary-600 hover:text-primary-900'
     },
@@ -132,7 +156,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   contentActions = [
     {
-      label: 'Crear ciudad',
+      label: 'Crear módulo',
       icon: Plus,
       action: () => this.openCreateDialog(),
       style: 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -140,7 +164,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private citiesService: CitiesService,
+    private modulesService: ModulesService,
     private dialogService: DialogService
   ) { }
 
@@ -153,17 +177,17 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.applyFilters();
     });
 
-    this.loadCities();
+    this.loadModules();
   }
 
   ngOnDestroy(): void {
     this.searchSubject.complete();
   }
 
-  loadCities(): void {
+  loadModules(): void {
     this.loading = true;
 
-    const params: CitySearchParams = {
+    const params: ModuleSearchParams = {
       ...this.filterParams,
       page: this.pagination.page,
       limit: this.pagination.limit
@@ -173,9 +197,9 @@ export class CitiesComponent implements OnInit, OnDestroy {
       params.search = this.searchTerm.trim();
     }
 
-    this.citiesService.getCities(params).subscribe({
+    this.modulesService.getModules(params).subscribe({
       next: (response) => {
-        this.cities = response.data;
+        this.modules = response.data;
         if (response.meta) {
           this.pagination = {
             page: response.meta.pagination.page || 1,
@@ -189,7 +213,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        toast.error('Error al obtener las ciudades. Por favor, inténtalo de nuevo.');
+        toast.error('Error al obtener los módulos. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
@@ -201,106 +225,114 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.filterParams.sortDirection =
         this.filterParams.sortDirection === 'ASC' ? 'DESC' : 'ASC';
     } else {
-      this.filterParams.sortBy = column as CitySearchParams['sortBy'];
+      this.filterParams.sortBy = column as ModuleSearchParams['sortBy'];
       this.filterParams.sortDirection = 'ASC';
     }
 
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadModules();
   }
 
   resetFilters(): void {
     this.filterParams = {};
     this.searchTerm = '';
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadModules();
     toast.success('Filtros restablecidos');
   }
 
   applyFilters(): void {
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadModules();
   }
 
   openCreateDialog(): void {
-    this.currentCity = { name: '' };
+    this.currentModule = {
+      id: undefined,
+      name: '',
+      description: '',
+      order: 1,
+      points: 0,
+      status: ModuleStatus.DRAFT,
+      guideId: 0
+    };
     this.dialogService.open(this.createDialogTpl);
   }
 
-  openEditDialog(city: City): void {
-    this.currentCity = { ...city };
+  openEditDialog(module: Module): void {
+    this.currentModule = { ...module };
     this.dialogService.open(this.editDialogTpl);
   }
 
-  openDeleteDialog(city: City): void {
-    this.currentCity = { ...city };
+  openDeleteDialog(module: Module): void {
+    this.currentModule = { ...module };
     this.dialogService.open(this.deleteDialogTpl);
   }
 
-  onCreateCity(cityData: CityFormData): void {
+  onCreateModule(moduleData: ModuleFormData): void {
     this.loading = true;
-    this.citiesService.createCity(cityData).subscribe({
+    this.modulesService.createModule(moduleData).subscribe({
       next: (response) => {
-        this.cities = [response.data, ...this.cities];
+        this.modules = [response.data, ...this.modules];
         this.pagination.total++;
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad creada exitosamente');
+        toast.success(response.message || 'Módulo creado exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al crear la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al crear el módulo. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onUpdateCity(cityData: CityFormData): void {
-    if (!cityData.id) return;
+  onUpdateModule(moduleData: ModuleFormData): void {
+    if (!moduleData.id) return;
 
     this.loading = true;
-    this.citiesService.updateCity(cityData.id, cityData).subscribe({
+    this.modulesService.updateModule(moduleData.id, moduleData).subscribe({
       next: (response) => {
-        this.cities = this.cities.map(c =>
-          c.id === response.data.id ? response.data : c
+        this.modules = this.modules.map(m =>
+          m.id === response.data.id ? response.data : m
         );
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad actualizada exitosamente');
+        toast.success(response.message || 'Módulo actualizado exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al actualizar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al actualizar el módulo. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onDeleteCity(cityData: CityFormData): void {
-    if (!cityData.id) {
-      toast.error('No se puede eliminar la ciudad: ID no válido');
+  onDeleteModule(moduleData: ModuleFormData): void {
+    if (!moduleData.id) {
+      toast.error('No se puede eliminar el módulo: ID no válido');
       return;
     }
 
     this.loading = true;
     this.dialogService.close();
 
-    this.citiesService.deleteCity(cityData.id).subscribe({
+    this.modulesService.deleteModule(moduleData.id).subscribe({
       next: (response) => {
-        this.cities = this.cities.filter(c => c.id !== cityData.id);
+        this.modules = this.modules.filter(m => m.id !== moduleData.id);
         this.pagination.total--;
-        toast.success(response.message || 'Ciudad eliminada exitosamente');
+        toast.success(response.message || 'Módulo eliminado exitosamente');
         this.loading = false;
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al eliminar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al eliminar el módulo. Por favor, inténtalo de nuevo.');
         console.error(err);
         this.loading = false;
       }
     });
   }
 
-  onAction(event: { action: string; row: City }): void {
+  onAction(event: { action: string; row: Module }): void {
     if (event.action === 'Editar') {
       this.openEditDialog(event.row);
     } else if (event.action === 'Eliminar') {
@@ -310,12 +342,12 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   onPageChange(page: number): void {
     this.pagination.page = page;
-    this.loadCities();
+    this.loadModules();
   }
 
   onPageSizeChange(size: number): void {
     this.pagination.limit = size;
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadModules();
   }
 }

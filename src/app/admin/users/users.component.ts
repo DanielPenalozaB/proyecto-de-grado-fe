@@ -44,6 +44,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
   @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
+  @ViewChild('createUserForm') createUserForm!: UserFormComponent;
+  @ViewChild('editUserForm') editUserForm!: UserFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;

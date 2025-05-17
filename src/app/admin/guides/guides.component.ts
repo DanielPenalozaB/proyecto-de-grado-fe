@@ -1,4 +1,4 @@
-import { CityFormComponent, CityFormData } from '@/app/feature/admin/cities/city-form.component';
+import { GuideFormComponent, GuideFormData } from '@/app/feature/admin/guides/guide-form/guide-form.component';
 import { Languages } from '@/common/common.interface';
 import {
   UbDialogCloseDirective,
@@ -12,17 +12,17 @@ import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FunnelX, LucideAngularModule, MapPin, Plus, Search, Trash2 } from 'lucide-angular';
+import { FunnelX, LucideAngularModule, Plus, Search, Trash2 } from 'lucide-angular';
 import { toast } from "ngx-sonner";
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ContentLayoutComponent } from '../../shared/layout/content-layout/content-layout.component';
 import { TableComponent } from "../../shared/ui/table/table.component";
 import { Pagination, TableAction, TableColumn } from '../../shared/ui/table/table.interfaces';
-import { City } from './cities.interface';
-import { CitiesService, CitySearchParams } from './cities.service';
+import { Guide, GuideDifficulty, GuideStatus } from './guides.interface';
+import { GuideSearchParams, GuidesService } from './guides.service';
 
 @Component({
-  selector: 'app-cities',
+  selector: 'app-guides',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,7 +30,7 @@ import { CitiesService, CitySearchParams } from './cities.service';
     ContentLayoutComponent,
     TableComponent,
     LucideAngularModule,
-    CityFormComponent,
+    GuideFormComponent,
     UbDialogContentDirective,
     UbDialogDescriptionDirective,
     UbDialogFooterDirective,
@@ -38,31 +38,40 @@ import { CitiesService, CitySearchParams } from './cities.service';
     UbDialogTitleDirective,
     UbDialogCloseDirective
   ],
-  templateUrl: './cities.component.html',
-  styleUrls: ['./cities.component.css']
+  templateUrl: './guides.component.html',
+  styleUrls: ['./guides.component.css']
 })
-export class CitiesComponent implements OnInit, OnDestroy {
+export class GuidesComponent implements OnInit, OnDestroy {
   @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
   @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
-    @ViewChild('createCityForm') createCityForm!: CityFormComponent;
-    @ViewChild('editCityForm') editCityForm!: CityFormComponent;
+  @ViewChild('createGuideForm') createGuideForm!: GuideFormComponent;
+  @ViewChild('editGuideForm') editGuideForm!: GuideFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;
-  readonly MapPin = MapPin;
 
-  cities: City[] = [];
+  guides: Guide[] = [];
   loading = false;
-  currentCity: CityFormData = { name: '' };
+  currentGuide: GuideFormData = {
+    name: '',
+    description: '',
+    difficulty: GuideDifficulty.BEGINNER,
+    estimatedDuration: 0,
+    status: GuideStatus.DRAFT,
+    language: Languages.ES,
+    points: 0
+  };
 
   searchSubject = new Subject<string>();
   searchTerm = '';
-  filterParams: CitySearchParams = {};
+  filterParams: GuideSearchParams = {};
 
   sortableFields: Record<string, string> = {
     'name': 'Nombre',
-    'rainfall': 'Pluviosidad',
+    'difficulty': 'Dificultad',
+    'estimatedDuration': 'Duración',
+    'points': 'Puntos',
     'createdAt': 'Fecha creación',
     'updatedAt': 'Fecha actualización'
   };
@@ -85,10 +94,37 @@ export class CitiesComponent implements OnInit, OnDestroy {
       truncate: true,
     },
     {
-      key: 'rainfall',
-      label: 'Pluviosidad (mm)',
+      key: 'difficulty',
+      label: 'Dificultad',
       type: 'badge',
-      format: (value: unknown) => value ? `${value} mm` : 'N/A'
+      format: <GuideDifficulty>(value: GuideDifficulty) => {
+        switch (value) {
+          case GuideDifficulty.BEGINNER: return 'Principiante';
+          case GuideDifficulty.INTERMEDIATE: return 'Intermedio';
+          case GuideDifficulty.ADVANCED: return 'Avanzado';
+          default: return 'N/A';
+        }
+      }
+    },
+    {
+      key: 'estimatedDuration',
+      label: 'Duración (min)',
+      type: 'badge',
+      class: 'w-32',
+      format: (value: unknown) => value ? `${value} min` : 'N/A'
+    },
+    {
+      key: 'status',
+      label: 'Estado',
+      type: 'badge',
+      format: <GuideStatus>(value: GuideStatus) => {
+        switch (value) {
+          case GuideStatus.DRAFT: return 'Borrador';
+          case GuideStatus.PUBLISHED: return 'Publicado';
+          case GuideStatus.ARCHIVED: return 'Archivado';
+          default: return 'N/A';
+        }
+      }
     },
     {
       key: 'language',
@@ -100,6 +136,13 @@ export class CitiesComponent implements OnInit, OnDestroy {
           default: return 'N/A';
         }
       }
+    },
+    {
+      key: 'points',
+      label: 'Puntos',
+      type: 'badge',
+      class: 'w-24',
+      format: (value: unknown) => value ? `${value} pts` : 'N/A'
     },
     {
       key: 'createdAt',
@@ -115,10 +158,10 @@ export class CitiesComponent implements OnInit, OnDestroy {
     }
   ];
 
-  tableActions: TableAction<City>[] = [
+  tableActions: TableAction<Guide>[] = [
     {
       label: 'Editar',
-      icon: MapPin,
+      icon: Plus,
       action: (row) => this.openEditDialog(row),
       style: 'text-primary-600 hover:text-primary-900'
     },
@@ -132,7 +175,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   contentActions = [
     {
-      label: 'Crear ciudad',
+      label: 'Crear guía',
       icon: Plus,
       action: () => this.openCreateDialog(),
       style: 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -140,7 +183,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private citiesService: CitiesService,
+    private guidesService: GuidesService,
     private dialogService: DialogService
   ) { }
 
@@ -153,17 +196,17 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.applyFilters();
     });
 
-    this.loadCities();
+    this.loadGuides();
   }
 
   ngOnDestroy(): void {
     this.searchSubject.complete();
   }
 
-  loadCities(): void {
+  loadGuides(): void {
     this.loading = true;
 
-    const params: CitySearchParams = {
+    const params: GuideSearchParams = {
       ...this.filterParams,
       page: this.pagination.page,
       limit: this.pagination.limit
@@ -173,9 +216,9 @@ export class CitiesComponent implements OnInit, OnDestroy {
       params.search = this.searchTerm.trim();
     }
 
-    this.citiesService.getCities(params).subscribe({
+    this.guidesService.getGuides(params).subscribe({
       next: (response) => {
-        this.cities = response.data;
+        this.guides = response.data;
         if (response.meta) {
           this.pagination = {
             page: response.meta.pagination.page || 1,
@@ -189,7 +232,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
       error: (err) => {
-        toast.error('Error al obtener las ciudades. Por favor, inténtalo de nuevo.');
+        toast.error('Error al obtener las guías. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
@@ -201,106 +244,114 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.filterParams.sortDirection =
         this.filterParams.sortDirection === 'ASC' ? 'DESC' : 'ASC';
     } else {
-      this.filterParams.sortBy = column as CitySearchParams['sortBy'];
+      this.filterParams.sortBy = column as GuideSearchParams['sortBy'];
       this.filterParams.sortDirection = 'ASC';
     }
 
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadGuides();
   }
 
   resetFilters(): void {
     this.filterParams = {};
     this.searchTerm = '';
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadGuides();
     toast.success('Filtros restablecidos');
   }
 
   applyFilters(): void {
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadGuides();
   }
 
   openCreateDialog(): void {
-    this.currentCity = { name: '' };
+    this.currentGuide = {
+      name: '',
+      description: '',
+      difficulty: GuideDifficulty.BEGINNER,
+      estimatedDuration: 0,
+      status: GuideStatus.DRAFT,
+      language: Languages.ES,
+      points: 0
+    };
     this.dialogService.open(this.createDialogTpl);
   }
 
-  openEditDialog(city: City): void {
-    this.currentCity = { ...city };
+  openEditDialog(guide: Guide): void {
+    this.currentGuide = { ...guide };
     this.dialogService.open(this.editDialogTpl);
   }
 
-  openDeleteDialog(city: City): void {
-    this.currentCity = { ...city };
+  openDeleteDialog(guide: Guide): void {
+    this.currentGuide = { ...guide };
     this.dialogService.open(this.deleteDialogTpl);
   }
 
-  onCreateCity(cityData: CityFormData): void {
+  onCreateGuide(guideData: GuideFormData): void {
     this.loading = true;
-    this.citiesService.createCity(cityData).subscribe({
+    this.guidesService.createGuide(guideData).subscribe({
       next: (response) => {
-        this.cities = [response.data, ...this.cities];
+        this.guides = [response.data, ...this.guides];
         this.pagination.total++;
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad creada exitosamente');
+        toast.success(response.message || 'Guía creada exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al crear la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al crear la guía. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onUpdateCity(cityData: CityFormData): void {
-    if (!cityData.id) return;
+  onUpdateGuide(guideData: GuideFormData): void {
+    if (!guideData.id) return;
 
     this.loading = true;
-    this.citiesService.updateCity(cityData.id, cityData).subscribe({
+    this.guidesService.updateGuide(guideData.id, guideData).subscribe({
       next: (response) => {
-        this.cities = this.cities.map(c =>
-          c.id === response.data.id ? response.data : c
+        this.guides = this.guides.map(g =>
+          g.id === response.data.id ? response.data : g
         );
         this.dialogService.close();
         this.loading = false;
-        toast.success(response.message || 'Ciudad actualizada exitosamente');
+        toast.success(response.message || 'Guía actualizada exitosamente');
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al actualizar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al actualizar la guía. Por favor, inténtalo de nuevo.');
         this.loading = false;
         console.error(err);
       }
     });
   }
 
-  onDeleteCity(cityData: CityFormData): void {
-    if (!cityData.id) {
-      toast.error('No se puede eliminar la ciudad: ID no válido');
+  onDeleteGuide(guideData: GuideFormData): void {
+    if (!guideData.id) {
+      toast.error('No se puede eliminar la guía: ID no válido');
       return;
     }
 
     this.loading = true;
     this.dialogService.close();
 
-    this.citiesService.deleteCity(cityData.id).subscribe({
+    this.guidesService.deleteGuide(guideData.id).subscribe({
       next: (response) => {
-        this.cities = this.cities.filter(c => c.id !== cityData.id);
+        this.guides = this.guides.filter(g => g.id !== guideData.id);
         this.pagination.total--;
-        toast.success(response.message || 'Ciudad eliminada exitosamente');
+        toast.success(response.message || 'Guía eliminada exitosamente');
         this.loading = false;
       },
       error: (err) => {
-        toast.error(err.error?.message || 'Error al eliminar la ciudad. Por favor, inténtalo de nuevo.');
+        toast.error(err.error?.message || 'Error al eliminar la guía. Por favor, inténtalo de nuevo.');
         console.error(err);
         this.loading = false;
       }
     });
   }
 
-  onAction(event: { action: string; row: City }): void {
+  onAction(event: { action: string; row: Guide }): void {
     if (event.action === 'Editar') {
       this.openEditDialog(event.row);
     } else if (event.action === 'Eliminar') {
@@ -310,12 +361,12 @@ export class CitiesComponent implements OnInit, OnDestroy {
 
   onPageChange(page: number): void {
     this.pagination.page = page;
-    this.loadCities();
+    this.loadGuides();
   }
 
   onPageSizeChange(size: number): void {
     this.pagination.limit = size;
     this.pagination.page = 1;
-    this.loadCities();
+    this.loadGuides();
   }
 }

@@ -1,9 +1,9 @@
 import { UserFormData } from '@/app/feature/admin/users/user-form/user-form.component';
+import { ApiResponse, DataResponse, MessageResponse } from '@/common/common.interface';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from '../../shared/ui/table/table.interfaces';
 import { User } from './users.interface';
 
 /**
@@ -33,21 +33,6 @@ export interface UserSearchParams {
  */
 export interface SetPasswordRequest {
   password: string;
-}
-
-/**
- * Response for basic message responses
- */
-export interface MessageResponse {
-  message: string;
-}
-
-/**
- * Response with data and message
- */
-export interface DataResponse<T> {
-  message: string;
-  data: T;
 }
 
 @Injectable({

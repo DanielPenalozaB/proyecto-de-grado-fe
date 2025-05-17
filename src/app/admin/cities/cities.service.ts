@@ -1,10 +1,10 @@
 import { CityFormData } from '@/app/feature/admin/cities/city-form.component';
+import { ApiResponse, DataResponse, Languages, MessageResponse } from '@/common/common.interface';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse } from '../../shared/ui/table/table.interfaces';
-import { City, Languages } from './cities.interface';
+import { City } from './cities.interface';
 
 export interface CitySearchParams {
   page?: number;
@@ -14,15 +14,6 @@ export interface CitySearchParams {
   name?: string;
   language?: Languages;
   search?: string;
-}
-
-export interface MessageResponse {
-  message: string;
-}
-
-export interface DataResponse<T> {
-  message: string;
-  data: T;
 }
 
 @Injectable({
