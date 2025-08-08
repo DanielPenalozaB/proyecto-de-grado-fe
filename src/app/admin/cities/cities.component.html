@@ -10,34 +10,36 @@
         </div>
         <input type="text" [ngModel]="searchTerm" (ngModelChange)="searchSubject.next($event)"
           placeholder="Buscar por nombre, descripción o idioma..."
-          class="flex h-10 w-full pl-10 rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          class="flex h-10 w-full pl-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+          [disabled]="loadingTable" />
       </div>
-
       <!-- Reset filters button -->
       @if (searchTerm) {
-      <button (click)="resetFilters()"
-        class="inline-flex items-center justify-center h-10 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50">
+      <button (click)="resetFilters()" [disabled]="loadingTable"
+        class="inline-flex items-center justify-center h-10 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
         <lucide-icon [img]="FunnelX" class="w-4 h-4 mr-2"></lucide-icon>
         Limpiar
       </button>
       }
     </div>
-
     <!-- Active filters display -->
-    <div *ngIf="searchTerm" class="flex flex-wrap gap-2 text-sm">
-      <button (click)="searchTerm = ''; applyFilters()"
-        class="inline-flex gap-1 cursor-pointer items-center bg-gray-100 px-3 py-1 rounded-full ml-2 text-gray-500 hover:text-gray-700"
+    @if (searchTerm) {
+    <div class="flex flex-wrap gap-2 text-sm">
+      <button (click)="searchTerm = ''; applyFilters()" [disabled]="loadingTable"
+        class="inline-flex gap-1 cursor-pointer items-center bg-gray-100 px-3 py-1 rounded-full ml-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         title="Limpiar búsqueda">
         <span>Búsqueda: {{ searchTerm }}</span>
         <lucide-icon [img]="FunnelX" class="w-3 h-3"></lucide-icon>
       </button>
     </div>
+    }
   </div>
 
   <!-- Table component -->
-  <app-table [columns]="columns" [data]="cities" [actions]="tableActions" [pagination]="pagination" [loading]="loading"
-    (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
-    (limitChange)="onPageSizeChange($event)"></app-table>
+  <app-table [columns]="columns" [data]="cities" [actions]="tableActions" [pagination]="pagination"
+    [loading]="loadingTable" (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
+    (limitChange)="onPageSizeChange($event)">
+  </app-table>
 </app-content-layout>
 
 <!-- Create City Dialog -->
@@ -47,16 +49,24 @@
       <h2 ubDialogTitle>Crear Ciudad</h2>
       <p ubDialogDescription>Añade una nueva ciudad al sistema</p>
     </div>
-
     <div ubDialogBody>
-      <app-city-form #createCityForm [isEditMode]="false" [city]="currentCity" (citySubmitted)="onCreateCity($event)"></app-city-form>
+      <app-city-form #createCityForm [isEditMode]="false" [city]="currentCity"
+        (citySubmitted)="onCreateCity($event)"></app-city-form>
     </div>
-
     <div ubDialogFooter>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="createCityForm.submitForm()" [disabled]="createCityForm.form.invalid"
-        ubDialogClose>
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
+        ubDialogClose [disabled]="loadingCreate">Cancelar</button>
+      <button type="button"
+        class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="createCityForm.submitForm()" [disabled]="createCityForm.form.invalid || loadingCreate" ubDialogClose>
+        @if (loadingCreate) {
+        <div class="flex items-center gap-2">
+          <div class="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+          Creando...
+        </div>
+        } @else {
         Crear
+        }
       </button>
     </div>
   </div>
@@ -69,15 +79,24 @@
       <h2 ubDialogTitle>Editar Ciudad</h2>
       <p ubDialogDescription>Modifica los detalles de la ciudad</p>
     </div>
-
     <div ubDialogBody>
-      <app-city-form #editCityForm [isEditMode]="true" [city]="currentCity" (citySubmitted)="onUpdateCity($event)"></app-city-form>
+      <app-city-form #editCityForm [isEditMode]="true" [city]="currentCity"
+        (citySubmitted)="onUpdateCity($event)"></app-city-form>
     </div>
-
     <div ubDialogFooter>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50" ubDialogClose>Cancelar</button>
-      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900" (click)="editCityForm.submitForm()" [disabled]="editCityForm.form.invalid" ubDialogClose>
-        Actualizar
+      <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
+        ubDialogClose [disabled]="loadingUpdate">Cancelar</button>
+      <button type="button"
+        class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-neutral-800 hover:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="editCityForm.submitForm()" [disabled]="editCityForm.form.invalid || loadingUpdate" ubDialogClose>
+        @if (loadingUpdate) {
+          <div class="flex items-center gap-2">
+            <div class="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+            Actualizando...
+          </div>
+        } @else {
+          Actualizar
+        }
       </button>
     </div>
   </div>
@@ -90,21 +109,26 @@
       <h2 ubDialogTitle>Eliminar Ciudad</h2>
       <p ubDialogDescription>Confirma la eliminación de la ciudad</p>
     </div>
-
-    <div class="border border-red-200! bg-red-50 p-4 rounded-md text-sm">
+    <div class="border border-red-200! mx-4 bg-red-50 p-4 rounded-md text-sm">
       <p>Est&aacute;s a punto de eliminar la ciudad <b>{{ currentCity.name }}</b>. Esta accion no se puede deshacer.
       </p>
     </div>
-
     <div ubDialogFooter>
       <button type="button" class="px-3 py-1 h-8 border rounded-md text-sm font-medium bg-white hover:bg-gray-50"
-        ubDialogClose>
+        ubDialogClose [disabled]="loadingDelete">
         Cancelar
       </button>
       <button type="submit" ubDialogClose
-        class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600"
-        (click)="onDeleteCity(currentCity)">
-        Eliminar
+        class="px-3 py-1 h-8 border rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="onDeleteCity(currentCity)" [disabled]="loadingDelete">
+        @if (loadingDelete) {
+          <div class="flex items-center gap-2">
+            <div class="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent"></div>
+            Eliminando...
+          </div>
+        } @else {
+          Eliminar
+        }
       </button>
     </div>
   </div>

@@ -1,9 +1,13 @@
 @import '@angular/cdk/overlay-prebuilt.css';
 @import "tailwindcss";
-
+@use "@material/tooltip/styles";
 @plugin 'tailwindcss-animate';
 
 @custom-variant dark (&:is(.dark *));
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 * {
   outline-color: #e2e8f0;
@@ -123,6 +127,14 @@
   }
 }
 
+body {
+  position: relative;
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 200;
+  font-style: normal;
+}
+
 /* ==================== */
 /* Dialog Scroll Styles */
 /* ==================== */
@@ -168,7 +180,7 @@
 
 /* Dialog header */
 [ubDialogHeader] {
-  padding: 1.5rem 1.5rem 0.5rem;
+  padding: 1rem 1rem 0.5rem;
   flex-shrink: 0;
 }
 
@@ -211,7 +223,7 @@
 
 /* Dialog footer */
 [ubDialogFooter] {
-  padding: 1rem 1.5rem;
+  padding: 1rem;
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
@@ -222,4 +234,20 @@
 /* Form inside dialog */
 [ubDialogContent] form {
   padding-bottom: 1rem;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+:root {
+  @include mat.tooltip-overrides((
+    container-color: white,
+    supporting-text-color: black,
+  ));
 }

@@ -9,7 +9,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [
     RouterOutlet,
     ...UB_DIALOG_DIRECTIVES,
-    ToasterComponent
+    ToasterComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

@@ -1,0 +1,129 @@
+<main class="flex flex-col gap-4 w-screen max-w-4xl mx-auto">
+  <div class="flex items-center justify-between gap-2 px-4 py-2">
+    <span>¡Hola, {{ user?.name?.split(' ')?.[0] }}!</span>
+    <div class="flex items-center gap-2">
+      <button
+        class="flex h-10 w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-left outline-none ring-sidebar-ring transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        [rdxDropdownMenuTrigger]="userMenu" [side]="DropdownSide.Bottom"
+        [align]="DropdownAlign.End" [sideOffset]="4">
+        <!-- Avatar -->
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
+          {{ getInitials(user?.name || '') }}
+        </div>
+      </button>
+
+      <!-- Dropdown menu template -->
+      <ng-template #userMenu>
+        <div
+          class="z-50 min-w-56 max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto overflow-x-hidden rounded-lg border bg-white shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]"
+          rdxDropdownMenuContent>
+          <!-- User info header -->
+          <div class="p-0 font-normal">
+            <div class="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
+                @if (user?.avatar) {
+                  <img [src]="user?.avatar ?? ''" [alt]="user?.name" class="h-8 w-8 rounded-lg object-cover">
+                } @else {
+                  {{ getInitials(user?.name || '') }}
+                }
+              </div>
+              <div class="grid flex-1 text-left text-sm leading-tight">
+                <span class="truncate font-semibold">{{ user?.name || 'User' }}</span>
+                <span class="truncate text-xs text-gray-500">{{ user?.email || '' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Separator -->
+          <div class="h-px bg-gray-200"></div>
+
+          <!-- Main menu items -->
+          <div class=" p-1">
+            <button
+              class="group relative flex w-full items-center rounded outline-none px-2 py-1.5 text-sm text-gray-900 hover:bg-gray-100"
+              rdxDropdownMenuItem (click)="navigateTo('/settings/account')">
+              <span class="mr-2">
+                <lucide-angular [img]="BadgeCheck" size="14" />
+              </span>
+              Perfil
+            </button>
+
+            <button
+              class="group relative flex w-full items-center rounded outline-none px-2 py-1.5 text-sm text-gray-900 hover:bg-gray-100"
+              rdxDropdownMenuItem (click)="navigateTo('/settings/notifications')">
+              <span class="mr-2">
+                <lucide-angular [img]="Bell" size="14" />
+              </span>
+              Notificaciones
+            </button>
+
+            @if (user?.role === 'admin') {
+              <button
+                class="group relative flex w-full items-center rounded outline-none px-2 py-1.5 text-sm text-gray-900 hover:bg-gray-100"
+                rdxDropdownMenuItem (click)="navigateTo('/admin')">
+                <span class="mr-2">
+                  <lucide-angular [img]="ScanEye" size="14" />
+                </span>
+                Vista de administrador
+              </button>
+            }
+          </div>
+
+          <!-- Separator -->
+          <div class="h-px bg-gray-200"></div>
+
+          <!-- Logout -->
+          <div class="p-1">
+            <button
+              class="group relative flex w-full items-center rounded outline-none px-2 py-1.5 text-sm text-gray-900 hover:bg-gray-100"
+              rdxDropdownMenuItem (click)="logout()">
+              <span class="mr-2">
+                <lucide-angular [img]="LogOut" size="14" />
+              </span>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+  <div class="flex flex-col gap-5 py-6 pl-6 w-full overflow-hidden">
+    <div class="flex flex-col gap-2 pr-6">
+      <h2 class="font-bold text-xl">Guías interactivas</h2>
+      <p class="font-medium">Aprende sobre los distintos métodos de recolección de agua</p>
+    </div>
+    <div class="flex gap-4 overflow-x-auto pr-6">
+      @for (guide of guides; track guide.id; let i = $index) {
+        <div [ngClass]="{ 'bg-[#0D9488] border-[#0D9488]': i === 0, 'bg-white border-neutral-200': i !== 0 }" class="gap-4 flex flex-col p-6 min-w-3xs max-w-3xs border rounded-2xl hover:outline-2 hover:outline-[#CCFBF1] transition-all duration-300 ease-in-out">
+          <div class="flex items-center gap-4">
+            <span [ngClass]="{ 'text-white': i === 0, 'text-[#0D9488]': i !== 0 }" class="font-bold text-2xl">{{ guide.title }}</span>
+          </div>
+          <p [ngClass]="{ 'text-[#CCFBF1]' : i === 0, 'text-[#0D9488]': i !== 0 }">
+            {{ guide.description }}
+          </p>
+          <div [ngClass]="{ 'text-[#5EEAD4]' : i === 0, 'text-[#14B8A6]': i !== 0 }" class="flex items-center gap-2">
+            <lucide-angular [img]="Clock" class="size-4" />
+            <span>{{ guide.duration }}</span>
+          </div>
+          <button type="button" [ngClass]="{ 'bg-[#CCFBF1] hover:bg-[#f0fdfc] text-[#0D9488]' : i === 0, 'bg-[#0D9488] hover:bg-[#14b8a9] text-[#CCFBF1]': i !== 0 }" class="w-full rounded-lg py-2 cursor-pointer px-4 flex justify-center items-center gap-2 transition-all duration-200 ease-in-out">
+            Iniciar lección
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+  <div class="flex items-center justify-between gap-4 p-5 p-6 bg-[#CCFBF1] sm:rounded-lg">
+    <p class="text-[#115E59] text-xl">
+      Ya calculaste el <strong>potencial hídrico?</strong>
+    </p>
+    <button type="button" class="rounded-lg py-2 cursor-pointer px-4 flex text-sm justify-center items-center gap-2 bg-[#0D9488] text-[#F0FDFA] whitespace-nowrap">
+      Vamos a calcular
+    </button>
+  </div>
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 p-4 rounded-2xl bg-white shadow-md">
+    <button class="bg-[#CCFBF1] h-[60px] w-[60px] rounded-xl"></button>
+    <button class="bg-[#CCFBF1] h-[60px] w-[60px] rounded-xl"></button>
+    <button class="bg-[#CCFBF1] h-[60px] w-[60px] rounded-xl"></button>
+    <button class="bg-[#CCFBF1] h-[60px] w-[60px] rounded-xl"></button>
+  </div>
+</main>

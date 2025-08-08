@@ -51,7 +51,12 @@ export class UsersComponent implements OnInit, OnDestroy {
   readonly FunnelX = FunnelX;
 
   users: User[] = [];
-  loading = false;
+
+  loadingTable = false;
+  loadingCreate = false;
+  loadingUpdate = false;
+  loadingDelete = false;
+
   currentUser: UserFormData = { name: '', email: '' };
 
   searchSubject = new Subject<string>();
@@ -82,14 +87,14 @@ export class UsersComponent implements OnInit, OnDestroy {
   pagination: Pagination = {
     page: 1,
     limit: 10,
-    pageCount: 1,
-    total: 0,
+    totalItems: 0,
+    totalPages: 1,
     hasNextPage: false,
     hasPreviousPage: false
   };
 
   columns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
+    { key: 'name', label: 'Nombre', class: 'min-w-40' },
     { key: 'email', label: 'Email' },
     {
       key: 'role',
@@ -144,8 +149,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private usersService: UsersService,
-    private dialogService: DialogService
+    private readonly usersService: UsersService,
+    private readonly dialogService: DialogService
   ) { }
 
   ngOnInit(): void {
@@ -170,7 +175,7 @@ export class UsersComponent implements OnInit, OnDestroy {
    * Load users with current pagination, sorting and filtering parameters
    */
   loadUsers(): void {
-    this.loading = true;
+    this.loadingTable = true;
 
     const params: UserSearchParams = {
       ...this.filterParams,
@@ -186,22 +191,22 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.usersService.getUsers(params).subscribe({
       next: (response) => {
         this.users = response.data;
+        this.loadingTable = false;
         // Update pagination
         if (response.meta) {
           this.pagination = {
-            page: response.meta.pagination.page || 1,
-            limit: response.meta.pagination.limit || 10,
-            pageCount: response.meta.pagination.pageCount || 1,
-            total: response.meta.pagination.total || 0,
-            hasNextPage: response.meta.pagination.hasNextPage || false,
-            hasPreviousPage: response.meta.pagination.hasPreviousPage || false
+            page: response.meta.page || 1,
+            limit: response.meta.limit || 10,
+            totalItems: response.meta.totalItems || 0,
+            totalPages: response.meta.totalPages || 1,
+            hasNextPage: response.meta.hasNextPage || false,
+            hasPreviousPage: response.meta.hasPreviousPage || false
           };
         }
-        this.loading = false;
       },
       error: (err) => {
         toast.error('Error al obtener los usuarios. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingTable = false;
         console.error(err);
       }
     });
@@ -270,7 +275,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   onCreateUser(userData: UserFormData): void {
-    this.loading = true;
+    this.loadingCreate = true;
     const createData = { ...userData };
     delete createData.id;
 
@@ -278,14 +283,14 @@ export class UsersComponent implements OnInit, OnDestroy {
       next: (response) => {
         // Insert the new user at the top of the list
         this.users = [response.data, ...this.users];
-        this.pagination.total++;
+        this.pagination.totalItems++;
         this.dialogService.close();
-        this.loading = false;
+        this.loadingCreate = false;
         toast.success(response.message || 'Usuario creado exitosamente');
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al crear el usuario. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingCreate = false;
         console.error(err);
       }
     });
@@ -294,7 +299,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   onUpdateUser(userData: UserFormData): void {
     if (!userData.id) return;
 
-    this.loading = true;
+    this.loadingUpdate = true;
     this.usersService.updateUser(userData.id, userData).subscribe({
       next: (response) => {
         // Update the user in the list
@@ -302,12 +307,12 @@ export class UsersComponent implements OnInit, OnDestroy {
           u.id === response.data.id ? response.data : u
         );
         this.dialogService.close();
-        this.loading = false;
+        this.loadingUpdate = false;
         toast.success(response.message || 'Usuario actualizado exitosamente');
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al actualizar el usuario. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingUpdate = false;
         console.error(err);
       }
     });
@@ -319,20 +324,20 @@ export class UsersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loading = true;
+    this.loadingDelete = true;
     this.dialogService.close(); // Close the dialog immediately
 
     this.usersService.deleteUser(userData.id).subscribe({
       next: (response) => {
         this.users = this.users.filter(u => u.id !== userData.id);
-        this.pagination.total--;
+        this.pagination.totalItems--;
         toast.success(response.message || 'Usuario eliminado exitosamente');
-        this.loading = false;
+        this.loadingDelete = false;
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al eliminar el usuario. Por favor, inténtalo de nuevo.');
         console.error(err);
-        this.loading = false;
+        this.loadingDelete = false;
       }
     });
   }

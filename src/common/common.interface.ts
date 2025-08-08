@@ -3,16 +3,16 @@
  * @template T
  */
 export interface ApiResponse<T> {
+  success: boolean,
+  message: string,
   data: T[];
   meta?: {
-    pagination: {
-      page: number;
-      limit: number;
-      pageCount: number;
-      total: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
   };
 }
 
@@ -27,7 +27,8 @@ export interface MessageResponse {
  * Response with data and message
  */
 export interface DataResponse<T> {
-  message: string;
+  success: boolean,
+  message: string,
   data: T;
 }
 

@@ -1,5 +1,5 @@
 import { CityFormData } from '@/app/feature/admin/cities/city-form.component';
-import { ApiResponse, DataResponse, Languages, MessageResponse } from '@/common/common.interface';
+import { ApiResponse, DataResponse, MessageResponse } from '@/common/common.interface';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -11,8 +11,7 @@ export interface CitySearchParams {
   limit?: number;
   sortBy?: 'id' | 'name' | 'rainfall' | 'createdAt' | 'updatedAt';
   sortDirection?: 'ASC' | 'DESC';
-  name?: string;
-  language?: Languages;
+  zoneId?: string;
   search?: string;
 }
 
@@ -20,9 +19,9 @@ export interface CitySearchParams {
   providedIn: 'root'
 })
 export class CitiesService {
-  private apiUrl = 'http://localhost:4000/cities';
+  private readonly apiUrl = 'http://localhost:4000/cities';
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getCities(params: CitySearchParams = {}): Observable<ApiResponse<City>> {
     let httpParams = new HttpParams();
@@ -31,8 +30,7 @@ export class CitiesService {
     if (params.limit !== undefined) httpParams = httpParams.set('limit', params.limit.toString());
     if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
     if (params.sortDirection) httpParams = httpParams.set('sortDirection', params.sortDirection);
-    if (params.name) httpParams = httpParams.set('name', params.name);
-    if (params.language) httpParams = httpParams.set('language', params.language);
+    if (params.zoneId) httpParams = httpParams.set('zoneId', params.zoneId);
     if (params.search) httpParams = httpParams.set('search', params.search);
 
     return this.http.get<ApiResponse<City>>(this.apiUrl, { params: httpParams });

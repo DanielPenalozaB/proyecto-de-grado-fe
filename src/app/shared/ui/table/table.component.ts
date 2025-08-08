@@ -41,7 +41,7 @@ export class TableComponent<T extends { id: number | string }> {
   readonly ChevronsLeft = ChevronsLeft;
   readonly ChevronsRight = ChevronsRight;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private readonly sanitizer: DomSanitizer) {}
 
   /**
    * Handles dropdown menu actions
@@ -78,7 +78,7 @@ export class TableComponent<T extends { id: number | string }> {
   }
 
   changePage(page: number): void {
-    if (page >= 1 && page <= (this.pagination?.pageCount || 1)) {
+    if (page >= 1 && page <= (this.pagination?.totalPages || 1)) {
       this.pageChange.emit(page);
     }
   }

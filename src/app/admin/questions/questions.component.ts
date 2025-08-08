@@ -1,11 +1,11 @@
 import { QuestionFormComponent, QuestionFormData } from '@/app/feature/admin/questions/question-form/question-form.component';
 import {
-  UbDialogCloseDirective,
-  UbDialogContentDirective,
-  UbDialogDescriptionDirective,
-  UbDialogFooterDirective,
-  UbDialogHeaderDirective,
-  UbDialogTitleDirective
+    UbDialogCloseDirective,
+    UbDialogContentDirective,
+    UbDialogDescriptionDirective,
+    UbDialogFooterDirective,
+    UbDialogHeaderDirective,
+    UbDialogTitleDirective
 } from '@/components/ui/dialog';
 import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
@@ -78,8 +78,8 @@ export class QuestionsComponent implements OnInit, OnDestroy {
   pagination: Pagination = {
     page: 1,
     limit: 10,
-    pageCount: 1,
-    total: 0,
+    totalPages: 1,
+    totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false
   };
@@ -222,12 +222,12 @@ export class QuestionsComponent implements OnInit, OnDestroy {
         this.questions = response.data;
         if (response.meta) {
           this.pagination = {
-            page: response.meta.pagination.page || 1,
-            limit: response.meta.pagination.limit || 10,
-            pageCount: response.meta.pagination.pageCount || 1,
-            total: response.meta.pagination.total || 0,
-            hasNextPage: response.meta.pagination.hasNextPage || false,
-            hasPreviousPage: response.meta.pagination.hasPreviousPage || false
+            page: response.meta.page || 1,
+            limit: response.meta.limit || 10,
+            totalPages: response.meta.totalPages || 1,
+            totalItems: response.meta.totalItems || 0,
+            hasNextPage: response.meta.hasNextPage || false,
+            hasPreviousPage: response.meta.hasPreviousPage || false
           };
         }
         this.loading = false;
@@ -296,7 +296,7 @@ export class QuestionsComponent implements OnInit, OnDestroy {
     this.questionsService.createQuestion(questionData).subscribe({
       next: (response) => {
         this.questions = [response.data, ...this.questions];
-        this.pagination.total++;
+        this.pagination.totalItems++;
         this.dialogService.close();
         this.loading = false;
         toast.success(response.message || 'Pregunta creada exitosamente');
@@ -342,7 +342,7 @@ export class QuestionsComponent implements OnInit, OnDestroy {
     this.questionsService.deleteQuestion(questionData.id).subscribe({
       next: (response) => {
         this.questions = this.questions.filter(q => q.id !== questionData.id);
-        this.pagination.total--;
+        this.pagination.totalItems--;
         toast.success(response.message || 'Pregunta eliminada exitosamente');
         this.loading = false;
       },

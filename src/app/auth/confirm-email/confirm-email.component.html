@@ -1,0 +1,25 @@
+<div class="bg-primary-foreground container grid h-svh max-w-none items-center justify-center">
+  <div class="mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-[480px] sm:p-8">
+    <div class="bg-card text-card-foreground flex flex-col rounded-xl border p-6 shadow-sm gap-4">
+      @if (isLoading) {
+        <div class="loading-section">
+          <p class="text-xl font-bold mb-2 text-neutral-800">Confirming your email...</p>
+        </div>
+      } @else if (!isLoading && isSuccess) {
+        <div class="flex flex-col gap-1 text-base text-neutral-500">
+          <h2 class="text-xl font-bold mb-2 text-neutral-800">Email Confirmed!</h2>
+          <p>Your email address has been successfully verified.</p>
+          <p class="text-sm text-center">You will be redirected to the login page shortly.</p>
+        </div>
+      } @else if (!isLoading && errorMessage) {
+        <div class="error-section">
+          <h2 class="text-xl font-bold mb-2 text-neutral-800">Confirmation Failed</h2>
+          <p>{{ errorMessage }}</p>
+          <a href="/auth/sign-in" class='mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer bg-neutral-900 text-white shadow-xs hover:bg-neutral-900/90 h-9 px-4 py-2 has-[>svg]:px-3'>
+            Go to sign in
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+</div>

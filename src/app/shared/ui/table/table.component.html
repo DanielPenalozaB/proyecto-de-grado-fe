@@ -2,9 +2,9 @@
   class="ring-offset-background focus-visible:ring-ring relative mt-2 flex flex-col gap-4 overflow-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
 
   @if (error) {
-  <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700">
-    {{ error }}
-  </div>
+    <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700">
+      {{ error }}
+    </div>
   }
 
   <div class="overflow-hidden rounded-lg border">
@@ -14,82 +14,82 @@
           <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100">
             <!-- Select All Checkbox -->
             @if (selectable) {
-            <th
-              class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-              <div class="flex items-center justify-center">
-                <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
-                  (change)="toggleAllRows()"
-                  class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900"
-                  [disabled]="data.length === 0">
-              </div>
-            </th>
+              <th
+                class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                <div class="flex items-center justify-center">
+                  <input type="checkbox" [checked]="selectedRows.size === data.length && data.length > 0"
+                    (change)="toggleAllRows()"
+                    class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900"
+                    [disabled]="data.length === 0">
+                </div>
+              </th>
             }
 
             <!-- Column Headers -->
             @for (column of columns; track column.key) {
-            <th
-              [ngClass]="cn('h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px] whitespace-nowrap', column.class)"
-              [style.width]="column.width">
-              {{ column.label }}
-            </th>
+              <th
+                [ngClass]="cn('h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px] whitespace-nowrap', column.class)"
+                [style.width]="column.width">
+                {{ column.label }}
+              </th>
             }
 
             <!-- Actions Header -->
             @if (actions.length > 0) {
-            <th
-              class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-            </th>
+              <th
+                class="h-10 px-2 text-left align-middle font-medium text-neutral-600 [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+              </th>
             }
           </tr>
         </thead>
         <tbody class="[&amp;_tr:last-child]:border-0">
           <!-- Data Rows -->
           @for (row of data; track row.id) {
-          <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100"
-            [class.bg-neutral-100]="selectedRows.has(row)">
-            <!-- Row Checkbox -->
-            @if (selectable) {
-            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-              <div class="flex items-center justify-center">
-                <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
-                  class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900">
-              </div>
-            </td>
-            }
-
-            <!-- Data Cells -->
-            @for (column of columns; track column.key) {
-            <td
-              [ngClass]="cn('p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]', { 'line-clamp-1 h-8 mt-1': column.truncate })">
-              @if (column.type === 'badge') {
-              <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
-                <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
-              </app-badge>
-              } @else {
-              <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
+            <tr class="border-b transition-colors hover:bg-neutral-100/50 data-[state=selected]:bg-neutral-100"
+              [class.bg-neutral-100]="selectedRows.has(row)">
+              <!-- Row Checkbox -->
+              @if (selectable) {
+                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                  <div class="flex items-center justify-center">
+                    <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
+                      class="border-primary focus-visible:ring-ring data-[state=checked]:text-primary-foreground peer h-4 w-4 shrink-0 rounded-sm border shadow focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-neutral-900">
+                  </div>
+                </td>
               }
-            </td>
-            }
 
-            <!-- Actions dropdown -->
-            @if (actions.length > 0) {
-            <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
-              <div class="flex justify-center gap-2">
-                <app-dropdown-menu [actions]="actions" [rowData]="row" [side]="DropdownSide.Left"
-                  [align]="DropdownAlign.Start" [sideOffset]="0"
-                  (actionSelected)="onDropdownAction($event)"></app-dropdown-menu>
-              </div>
-            </td>
-            }
-          </tr>
+              <!-- Data Cells -->
+              @for (column of columns; track column.key) {
+              <td
+                [ngClass]="cn('p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]', { 'line-clamp-1 h-8 mt-1': column.truncate })">
+                @if (column.type === 'badge') {
+                  <app-badge [type]="column.key" [text]="formatCellValue(row, column)">
+                    <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
+                  </app-badge>
+                } @else {
+                  <span [innerHTML]="safeHtml(formatCellValue(row, column))"></span>
+                }
+              </td>
+              }
+
+              <!-- Actions dropdown -->
+              @if (actions.length > 0) {
+                <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+                  <div class="flex justify-center gap-2">
+                    <app-dropdown-menu [actions]="actions" [rowData]="row" [side]="DropdownSide.Left"
+                      [align]="DropdownAlign.Start" [sideOffset]="0"
+                      (actionSelected)="onDropdownAction($event)"></app-dropdown-menu>
+                  </div>
+                </td>
+              }
+            </tr>
           }
           @if (data.length === 0 && !loading) {
-          <tr>
-            <td [colSpan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
-              class="p-4 text-center text-gray-500">
-              No hay registros
-            </td>
-          </tr>
+            <tr>
+              <td [colSpan]="columns.length + (selectable ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
+                class="p-4 text-center text-gray-500">
+                No hay registros
+              </td>
+            </tr>
           }
         </tbody>
       </table>
@@ -106,9 +106,9 @@
   <div class="flex items-center justify-between px-4">
     <div class="text-neutral-600 hidden flex-1 text-sm lg:flex">
       @if (selectable === true) {
-      {{ selectedRows.size }} of {{ pagination.total }} {{ pagination.total === 1 ? 'item' : 'items' }} seleccionados
+      {{ selectedRows.size }} of {{ pagination.totalItems }} {{ pagination.totalItems === 1 ? 'item' : 'items' }} seleccionados
       } @else {
-      {{ pagination.total }} {{ pagination.total === 1 ? 'item' : 'items' }} en total
+      {{ pagination.totalItems }} {{ pagination.totalItems === 1 ? 'item' : 'items' }} en total
       }
     </div>
     <div class="flex w-full items-center gap-8 lg:w-fit">
@@ -125,7 +125,7 @@
         </select>
       </div>
       <div class="flex w-fit items-center justify-center text-sm font-medium">
-        P&aacute;gina {{ pagination.page }} de {{ pagination.pageCount }}
+        P&aacute;gina {{ pagination.page }} de {{ pagination.totalPages }}
       </div>
       <div class="ml-auto flex items-center gap-2 lg:ml-0">
         <button (click)="changePage(1)" [disabled]="pagination.page === 1"
@@ -138,12 +138,12 @@
           <span class="sr-only">Ir a la página anterior</span>
           <lucide-icon [img]="ChevronLeft" class="h-4 w-4" />
         </button>
-        <button (click)="changePage(pagination.page + 1)" [disabled]="pagination.page === pagination.pageCount"
+        <button (click)="changePage(pagination.page + 1)" [disabled]="pagination.page === pagination.totalPages"
           class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
           <span class="sr-only">Ir a la página siguiente</span>
           <lucide-icon [img]="ChevronRight" class="h-4 w-4" />
         </button>
-        <button (click)="changePage(pagination.pageCount)" [disabled]="pagination.page === pagination.pageCount"
+        <button (click)="changePage(pagination.totalPages)" [disabled]="pagination.page === pagination.totalPages"
           class="focus-visible:ring-ring [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9 items-center justify-center gap-2 p-2 whitespace-nowrap rounded-md border text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
           <span class="sr-only">Ir a la última página</span>
           <lucide-icon [img]="ChevronsRight" class="h-4 w-4" />

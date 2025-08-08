@@ -1,1 +1,87 @@
-<p>sidebar works!</p>
+<div class="flex h-screen">
+  <!-- Overlay for mobile -->
+  <button type="button" *ngIf="isMobileView && isSidebarOpen" class="fixed inset-0 bg-black opacity-50 z-20"
+    (click)="toggleSidebar($event)" (keyup.enter)="toggleSidebar($event)"></button>
+
+  <!-- Sidebar -->
+  <aside [class]="isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+    class="fixed md:relative z-30 w-64 h-full bg-white shadow-md transform transition-transform duration-200 ease-in-out flex flex-col">
+
+    <!-- Sidebar Header - App Logo and Name -->
+    <div class="flex items-center justify-between p-2 border-b border-gray-200">
+      <div class="flex items-center gap-2 p-2">
+        <div
+          class="text-neutral-800 size-8 h-8 w-8 p-2 flex aspect-square items-center justify-center rounded-lg bg-cyan-500">
+          <lucide-icon [img]="Droplets" alt="Logo" class="size-4 text-white"></lucide-icon>
+        </div>
+        <div class="grid flex-1 text-left text-sm leading-tight">
+          <span class="truncate font-semibold">{{ appName }}</span>
+        </div>
+      </div>
+      <button (click)="toggleSidebar($event)" (keyup.enter)="toggleSidebar($event)"
+        class="md:hidden text-gray-500 hover:text-gray-700" aria-label="Toggle sidebar">
+        <lucide-icon [img]="X"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Sidebar Content - Navigation Links -->
+    <nav class="flex-1 overflow-y-auto p-2">
+      <ul class="space-y-2">
+        <ng-container *ngFor="let link of links">
+          <li>
+            <div *ngIf="!link.children; else withChildren">
+              <a [routerLink]="link.url"
+                [class]="'flex items-center gap-2 p-2 rounded-lg transition-colors ' + (checkActiveLink(link) ? 'bg-neutral-100 text-blue-600' : 'hover:bg-gray-100 text-gray-700')"
+                routerLinkActive="bg-neutral-100 text-blue-600">
+                <lucide-icon [img]="link.icon" class="w-4 h-4"></lucide-icon>
+                <span>{{ link.label }}</span>
+              </a>
+            </div>
+
+            <ng-template #withChildren>
+              <button (click)="toggleSubMenu(link, $event)" (keyup.enter)="toggleSubMenu(link, $event)"
+                (keyup.space)="toggleSubMenu(link, $event)"
+                class="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
+                [attr.aria-expanded]="link.isExpanded" [attr.aria-controls]="'submenu-' + link.label">
+                <div class="flex items-center gap-2">
+                  <lucide-icon [img]="link.icon" class="w-4 h-4"></lucide-icon>
+                  <span>{{ link.label }}</span>
+                </div>
+                <lucide-icon [img]="icons.ChevronRight" class="h-4 w-4 transform transition-transform duration-200"
+                  [class.rotate-90]="link.isExpanded"></lucide-icon>
+              </button>
+
+              <ul *ngIf="link.isExpanded" [id]="'submenu-' + link.label" class="ml-6 mt-1 space-y-1">
+                <li *ngFor="let child of link.children">
+                  <a [routerLink]="child.url"
+                    [class]="'flex items-center gap-2 p-2 rounded-lg transition-colors ' + (checkActiveLink(child) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-700')"
+                    routerLinkActive="bg-blue-50 text-blue-600">
+                    <lucide-icon [img]="child.icon" class="w-4 h-4"></lucide-icon>
+                    <span class="text-sm">{{ child.label }}</span>
+                  </a>
+                </li>
+              </ul>
+            </ng-template>
+          </li>
+        </ng-container>
+      </ul>
+    </nav>
+
+    <!-- Sidebar Footer - User Menu -->
+    <div class="border-t border-gray-200 p-2">
+      <app-user-menu [isMobile]="isMobileView"></app-user-menu>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto">
+    <!-- Toggle button for mobile -->
+    <button *ngIf="!isSidebarOpen" (click)="toggleSidebar($event)" (keyup.enter)="toggleSidebar($event)"
+      class="fixed md:hidden z-10 m-4 p-2 rounded-md bg-white shadow-md text-gray-500 hover:text-gray-700"
+      aria-label="Open sidebar">
+      <lucide-icon [img]="icons.Menu" class="w-5 h-5"></lucide-icon>
+    </button>
+
+    <ng-content></ng-content>
+  </main>
+</div>

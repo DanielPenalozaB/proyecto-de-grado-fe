@@ -1,0 +1,59 @@
+<div class="bg-primary-foreground container grid h-svh max-w-none items-center justify-center">
+  <div class="mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-[480px] sm:p-8">
+    <div class="mb-4 flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-6 w-6">
+        <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"></path>
+      </svg>
+      <h1 class="text-xl font-medium">RecoAgua</h1>
+    </div>
+    <div data-slot="card" class="bg-card text-card-foreground flex flex-col rounded-xl border py-6 shadow-sm gap-4">
+      <div data-slot="card-header"
+        class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+        <div data-slot="card-title" class="font-semibold text-lg tracking-tight">Sign in</div>
+        <div data-slot="card-description" class="text-muted-foreground text-sm">
+          Enter your email and password below to log into your account
+        </div>
+      </div>
+      <div data-slot="card-content" class="px-6">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="grid gap-3">
+          <div class="grid gap-2">
+            <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
+            <input formControlName="email" name="email" type="email" id="email" autocomplete="email" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive" placeholder="name@example.com"/>
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <div class="text-red-500 text-xs">
+                Please enter a valid email
+              </div>
+            }
+          </div>
+          <div class="grid gap-2">
+            <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Password</label>
+            <input formControlName="password" name="password" type="password" id="password" autocomplete="current-password" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive" placeholder="********"/>
+          </div>
+          <button type="submit" [disabled]="loginForm.invalid || isLoading" class='mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer bg-neutral-900 text-white shadow-xs hover:bg-neutral-900/90 h-9 px-4 py-2 has-[>svg]:px-3'>
+            @if (isLoading) {
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+            }
+            Sign in
+          </button>
+          <div class="w-full flex items-center justify-between">
+            <a href="/auth/sign-up" class="text-sm hover:text-primary underline underline-offset-4">Don't have an account?</a>
+            <a href="/auth/forgot-password" class="text-sm hover:text-primary underline underline-offset-4">Forgot password?</a>
+          </div>
+        </form>
+      </div>
+      <div data-slot="card-footer" class="flex items-center px-6 [.border-t]:pt-6">
+        <p class="text-muted-foreground px-8 text-center text-sm">
+          By clicking Sign in, you agree to our
+          <a href="/terms" class="hover:text-primary underline underline-offset-4">Terms of Service</a> and
+          <a href="/privacy" class="hover:text-primary underline underline-offset-4">Privacy Policy</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

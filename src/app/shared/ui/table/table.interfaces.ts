@@ -25,10 +25,10 @@ export interface Meta {
 export interface Pagination {
   page: number;
   limit: number;
-  pageCount: number;
-  total: number;
-  hasNextPage: boolean;
+  totalItems: number;
+  totalPages: number;
   hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
 
 export interface Sort {

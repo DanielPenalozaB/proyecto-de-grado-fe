@@ -1,0 +1,104 @@
+<div class="h-full bg-white flex flex-col items-center">
+  <div class="card-header p-6 border-b w-full">
+    <h3 class="card-title flex items-center gap-2 text-lg font-semibold">
+      <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+      </svg>
+      Simulación Interactiva
+    </h3>
+    <p class="card-description text-sm text-gray-500">
+      Ajusta los parámetros para calcular tu potencial de recolección de agua
+    </p>
+  </div>
+
+  <div class="card p-6 space-y-6 max-w-md">
+    <!-- Location Selection -->
+    <div class="space-y-2">
+      <div class="flex items-center gap-2">
+        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <label for="location" class="text-sm font-medium flex items-center gap-2">
+          <span>Ubicación</span>
+          <lucide-icon
+            [img]="CircleHelp"
+            class="size-4"
+            mat-raised-button
+            matTooltip="La ubicación determina la cantidad de lluvia disponible para recolectar durante el año, siendo el factor principal que influye en el potencial hídrico de tu sistema."
+            matTooltipClass="!bg-blue-500 !text-white !rounded-lg !text-sm"
+          ></lucide-icon>
+        </label>
+      </div>
+      <select id="location" [(ngModel)]="location" (change)="calculateResults()"
+        class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <option value="norte">Zona Norte (Árida)</option>
+        <option value="centro">Zona Centro (Mediterránea)</option>
+        <option value="sur">Zona Sur (Lluviosa)</option>
+      </select>
+    </div>
+
+    <!-- Collection Method -->
+    <div class="space-y-2">
+      <label for="method" class="text-sm font-medium flex items-center gap-2">
+        <span>Método de Recolección</span>
+        <lucide-icon [img]="CircleHelp" class="size-4" mat-raised-button
+          matTooltip="Cada método tiene una eficiencia inherente basada en su capacidad para interceptar y canalizar el agua de lluvia sin pérdidas significativas."
+          matTooltipClass="!bg-blue-500 !text-white !rounded-lg !text-sm"></lucide-icon>
+        </label>
+      <select id="method" [(ngModel)]="method" (change)="calculateResults()"
+        class="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <option *ngFor="let method of COLLECTION_METHODS" [value]="method.id">
+          {{ method.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Area Input -->
+    <div class="space-y-2">
+      <div class="flex items-center gap-2">
+        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <label for="area" class="text-sm font-medium flex items-center gap-2">
+          <span>Área de Captación (m²): {{ area }}</span>
+          <lucide-icon [img]="CircleHelp" class="size-4" mat-raised-button
+          matTooltip="La superficie total expuesta a la lluvia que puede capturar agua.
+          Es la proyección horizontal del área de captación, medida en metros cuadrados. A mayor área, mayor volumen de agua recolectable por cada milímetro de lluvia."
+          matTooltipClass="!bg-blue-500 !text-white !rounded-lg !text-sm"></lucide-icon>
+        </label>
+      </div>
+      <div class="flex gap-4 items-center">
+        <input type="range" id="area" min="10" max="500" step="10" [(ngModel)]="area" (input)="calculateResults()"
+          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+        <input type="number" [(ngModel)]="area" (change)="calculateResults()"
+          class="w-20 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+      </div>
+    </div>
+
+    <!-- Efficiency Slider -->
+    <div class="space-y-2">
+      <label for="efficiency" class="text-sm font-medium flex items-center gap-2">
+        <span>Eficiencia del Sistema (%): {{ efficiency }}</span>
+        <lucide-icon [img]="CircleHelp" class="size-4" mat-raised-button
+          matTooltip="El porcentaje de agua de lluvia que efectivamente se logra capturar y almacenar.
+          Considera las pérdidas por evaporación, derrames, filtración y la calidad del sistema de canalización y filtrado instalado."
+          matTooltipClass="!bg-blue-500 !text-white !rounded-lg !text-sm"></lucide-icon>
+      </label>
+      <input type="range" id="efficiency" min="10" max="100" step="5" [(ngModel)]="efficiency"
+        (input)="calculateResults()" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+    </div>
+
+    <!-- Calculate Button -->
+    <button (click)="calculateAndEarnPoints()"
+      class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+      Calcular y Ganar Puntos
+    </button>
+
+    <!-- Results Display -->
+    <app-calculator-results [results]="results"></app-calculator-results>
+  </div>
+</div>

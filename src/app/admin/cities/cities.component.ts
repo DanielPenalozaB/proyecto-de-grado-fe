@@ -1,12 +1,12 @@
 import { CityFormComponent, CityFormData } from '@/app/feature/admin/cities/city-form.component';
 import { Languages } from '@/common/common.interface';
 import {
-  UbDialogCloseDirective,
-  UbDialogContentDirective,
-  UbDialogDescriptionDirective,
-  UbDialogFooterDirective,
-  UbDialogHeaderDirective,
-  UbDialogTitleDirective
+    UbDialogCloseDirective,
+    UbDialogContentDirective,
+    UbDialogDescriptionDirective,
+    UbDialogFooterDirective,
+    UbDialogHeaderDirective,
+    UbDialogTitleDirective
 } from '@/components/ui/dialog';
 import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
@@ -45,17 +45,21 @@ export class CitiesComponent implements OnInit, OnDestroy {
   @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
   @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
-    @ViewChild('createCityForm') createCityForm!: CityFormComponent;
-    @ViewChild('editCityForm') editCityForm!: CityFormComponent;
+  @ViewChild('createCityForm') createCityForm!: CityFormComponent;
+  @ViewChild('editCityForm') editCityForm!: CityFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;
   readonly MapPin = MapPin;
 
   cities: City[] = [];
-  loading = false;
-  currentCity: CityFormData = { name: '' };
 
+  loadingTable = false;
+  loadingCreate = false;
+  loadingUpdate = false;
+  loadingDelete = false;
+
+  currentCity: CityFormData = { name: '' };
   searchSubject = new Subject<string>();
   searchTerm = '';
   filterParams: CitySearchParams = {};
@@ -70,8 +74,8 @@ export class CitiesComponent implements OnInit, OnDestroy {
   pagination: Pagination = {
     page: 1,
     limit: 10,
-    pageCount: 1,
-    total: 0,
+    totalItems: 0,
+    totalPages: 1,
     hasNextPage: false,
     hasPreviousPage: false
   };
@@ -140,8 +144,8 @@ export class CitiesComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private citiesService: CitiesService,
-    private dialogService: DialogService
+    private readonly citiesService: CitiesService,
+    private readonly dialogService: DialogService
   ) { }
 
   ngOnInit(): void {
@@ -152,7 +156,6 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.searchTerm = searchTerm;
       this.applyFilters();
     });
-
     this.loadCities();
   }
 
@@ -161,8 +164,7 @@ export class CitiesComponent implements OnInit, OnDestroy {
   }
 
   loadCities(): void {
-    this.loading = true;
-
+    this.loadingTable = true;
     const params: CitySearchParams = {
       ...this.filterParams,
       page: this.pagination.page,
@@ -176,21 +178,21 @@ export class CitiesComponent implements OnInit, OnDestroy {
     this.citiesService.getCities(params).subscribe({
       next: (response) => {
         this.cities = response.data;
+        this.loadingTable = false;
         if (response.meta) {
           this.pagination = {
-            page: response.meta.pagination.page || 1,
-            limit: response.meta.pagination.limit || 10,
-            pageCount: response.meta.pagination.pageCount || 1,
-            total: response.meta.pagination.total || 0,
-            hasNextPage: response.meta.pagination.hasNextPage || false,
-            hasPreviousPage: response.meta.pagination.hasPreviousPage || false
+            page: response.meta.page || 1,
+            limit: response.meta.limit || 10,
+            totalItems: response.meta.totalItems || 0,
+            totalPages: response.meta.totalPages || 1,
+            hasNextPage: response.meta.hasNextPage || false,
+            hasPreviousPage: response.meta.hasPreviousPage || false
           };
         }
-        this.loading = false;
       },
       error: (err) => {
         toast.error('Error al obtener las ciudades. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingTable = false;
         console.error(err);
       }
     });
@@ -204,7 +206,6 @@ export class CitiesComponent implements OnInit, OnDestroy {
       this.filterParams.sortBy = column as CitySearchParams['sortBy'];
       this.filterParams.sortDirection = 'ASC';
     }
-
     this.pagination.page = 1;
     this.loadCities();
   }
@@ -238,18 +239,18 @@ export class CitiesComponent implements OnInit, OnDestroy {
   }
 
   onCreateCity(cityData: CityFormData): void {
-    this.loading = true;
+    this.loadingCreate = true;
     this.citiesService.createCity(cityData).subscribe({
       next: (response) => {
         this.cities = [response.data, ...this.cities];
-        this.pagination.total++;
+        this.pagination.totalItems++;
         this.dialogService.close();
-        this.loading = false;
+        this.loadingCreate = false;
         toast.success(response.message || 'Ciudad creada exitosamente');
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al crear la ciudad. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingCreate = false;
         console.error(err);
       }
     });
@@ -258,19 +259,19 @@ export class CitiesComponent implements OnInit, OnDestroy {
   onUpdateCity(cityData: CityFormData): void {
     if (!cityData.id) return;
 
-    this.loading = true;
+    this.loadingUpdate = true;
     this.citiesService.updateCity(cityData.id, cityData).subscribe({
       next: (response) => {
         this.cities = this.cities.map(c =>
           c.id === response.data.id ? response.data : c
         );
         this.dialogService.close();
-        this.loading = false;
+        this.loadingUpdate = false;
         toast.success(response.message || 'Ciudad actualizada exitosamente');
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al actualizar la ciudad. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingUpdate = false;
         console.error(err);
       }
     });
@@ -282,20 +283,20 @@ export class CitiesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loading = true;
+    this.loadingDelete = true;
     this.dialogService.close();
 
     this.citiesService.deleteCity(cityData.id).subscribe({
       next: (response) => {
         this.cities = this.cities.filter(c => c.id !== cityData.id);
-        this.pagination.total--;
+        this.pagination.totalItems--;
         toast.success(response.message || 'Ciudad eliminada exitosamente');
-        this.loading = false;
+        this.loadingDelete = false;
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al eliminar la ciudad. Por favor, inténtalo de nuevo.');
+        this.loadingDelete = false;
         console.error(err);
-        this.loading = false;
       }
     });
   }
@@ -317,5 +318,10 @@ export class CitiesComponent implements OnInit, OnDestroy {
     this.pagination.limit = size;
     this.pagination.page = 1;
     this.loadCities();
+  }
+
+  // Getter to determine if any operation is loading
+  get isAnyOperationLoading(): boolean {
+    return this.loadingCreate || this.loadingUpdate || this.loadingDelete;
   }
 }

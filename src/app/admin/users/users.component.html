@@ -50,7 +50,7 @@
   </div>
 
   <!-- Table component -->
-  <app-table [columns]="columns" [data]="users" [actions]="tableActions" [pagination]="pagination" [loading]="loading"
+  <app-table [columns]="columns" [data]="users" [actions]="tableActions" [pagination]="pagination" [loading]="loadingTable"
     (actionTriggered)="onAction($event)" (pageChange)="onPageChange($event)"
     (limitChange)="onPageSizeChange($event)"></app-table>
 </app-content-layout>
