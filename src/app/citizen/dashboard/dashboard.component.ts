@@ -1,20 +1,20 @@
+import { Guide } from '@/app/admin/guides/guides.interface';
+import { GuidesService } from '@/app/admin/guides/guides.service';
 import { AuthService } from '@/app/auth/auth.service';
 import { UserData } from '@/app/shared/ui/user-menu/user-menu.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { DropdownAlign, DropdownSide, RdxDropdownMenuContentDirective, RdxDropdownMenuItemDirective, RdxDropdownMenuTriggerDirective } from '@radix-ng/primitives/dropdown-menu';
-import { BadgeCheck, Bell, ChevronsUpDown, Clock, LogOut, LucideAngularModule, ScanEye, Sparkles, User } from 'lucide-angular';
+import { DropdownAlign, DropdownSide } from '@radix-ng/primitives/dropdown-menu';
+import { BadgeCheck, Bell, Calculator, ChevronsUpDown, Clock, LayoutGrid, LogOut, LucideAngularModule, Map, ScanEye, Sparkles, User, UserRound } from 'lucide-angular';
+import { toast } from 'ngx-sonner';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   imports: [
     CommonModule,
-    LucideAngularModule,
-    RdxDropdownMenuTriggerDirective,
-    RdxDropdownMenuContentDirective,
-    RdxDropdownMenuItemDirective
+    LucideAngularModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -32,35 +32,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly User = User;
   readonly ScanEye = ScanEye;
   readonly Clock = Clock;
+  readonly Map = Map;
+  readonly Home = LayoutGrid;
+  readonly Calculator = Calculator;
+  readonly Profile = UserRound;
 
   // Dropdown enums
   readonly DropdownSide = DropdownSide;
   readonly DropdownAlign = DropdownAlign;
 
-  readonly guides = [
-    {
-      id: 1,
-      title: 'Introducción',
-      link: '/guides/introduction',
-      description: 'El mundo de la recolección del agua con el objetivo de una vida sustentable.',
-      duration: '15 min',
-    }, {
-      id: 2,
-      title: 'Paso a paso',
-      link: '/guides/step-by-step',
-      description: 'Aprende paso a paso las distintas metodologías de recolección de agua.',
-      duration: '30 min',
-    }, {
-      id: 3,
-      title: 'Guía completa',
-      link: '/guides/complete-guide',
-      description: 'Aprende paso a paso las distintas metodologías de recolección de agua.',
-      duration: '2 horas',
-    }
-  ];
+  guides: Guide[] = [];
+  loadingGuides = false;
 
   constructor(
     private readonly authService: AuthService,
+    private readonly guidesService: GuidesService,
     private readonly router: Router
   ) { }
 
@@ -70,6 +56,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe(user => {
         this.user = user;
       });
+
+    this.loadGuides();
   }
 
   ngOnDestroy(): void {
@@ -92,12 +80,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   onUpgrade(): void {
     // Handle upgrade logic
-    console.log('Upgrade clicked');
     // You can navigate to upgrade page or open a modal
     this.router.navigate(['/upgrade']);
   }
 
   logout(): void {
     this.authService.logout();
+  }
+
+  loadGuides(): void {
+    this.loadingGuides = true;
+
+    this.guidesService.getGuides().subscribe({
+      next: (response) => {
+        this.guides = response.data;
+        this.loadingGuides = false;
+      },
+      error: (err) => {
+        toast.error('Error al obtener las guías. Por favor, inténtalo de nuevo.');
+        this.loadingGuides = false;
+        console.error(err);
+      }
+    });
   }
 }

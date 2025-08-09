@@ -66,7 +66,7 @@ export class SignInComponent implements OnInit {
         if (this.returnUrl && this.returnUrl !== '/') {
           this.router.navigateByUrl(this.returnUrl);
         } else {
-          const defaultRoute = this.getDefaultRouteForRole(response.user.role);
+          const defaultRoute = this.getDefaultRouteForRole(response.data.user.role);
           this.router.navigate([defaultRoute]);
         }
       },

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, Input, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 
 type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
@@ -8,24 +8,37 @@ type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
   selector: 'app-button',
   standalone: true,
   imports: [CommonModule],
-  template: `<ng-content></ng-content>`,
+  template: `
+    <button
+      [class]="buttonClasses"
+      [type]="type"
+      [disabled]="disabled"
+      [attr.data-slot]="'button'"
+      (click)="handleClick($event)"
+      (keydown)="handleKeyDown($event)"
+      (keyup)="handleKeyUp($event)"
+      (keypress)="handleKeyPress($event)"
+    >
+      <ng-content></ng-content>
+    </button>
+  `,
   styleUrls: ['./button.component.css'],
   encapsulation: ViewEncapsulation.None,
   host: {
-    '[class]': 'buttonClasses',
-    '[attr.type]': 'type',
-    '[attr.disabled]': 'disabled || null',
-    '[attr.data-slot]': '"button"'
+    'style': 'display: contents'
   }
 })
 export class ButtonComponent {
-  private elementRef = inject(ElementRef);
-
   @Input() variant: ButtonVariant = 'default';
   @Input() size: ButtonSize = 'default';
   @Input() disabled = false;
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() class?: string;
+
+  @Output() clicked = new EventEmitter<MouseEvent>();
+  @Output() keyPressed = new EventEmitter<KeyboardEvent>();
+  @Output() keyDown = new EventEmitter<KeyboardEvent>();
+  @Output() keyUp = new EventEmitter<KeyboardEvent>();
 
   get buttonClasses(): string {
     // Base classes
@@ -50,5 +63,29 @@ export class ButtonComponent {
     }[this.size];
 
     return `${baseClasses} ${variantClasses} ${sizeClasses} ${this.class || ''}`;
+  }
+
+  handleClick(event: MouseEvent): void {
+    if (!this.disabled) {
+      this.clicked.emit(event);
+    }
+  }
+
+  handleKeyDown(event: KeyboardEvent): void {
+    this.keyDown.emit(event);
+
+    // Handle Enter and Space keys for accessibility
+    if ((event.key === 'Enter' || event.key === ' ') && this.type === 'button') {
+      event.preventDefault();
+      this.handleClick(event as any);
+    }
+  }
+
+  handleKeyUp(event: KeyboardEvent): void {
+    this.keyUp.emit(event);
+  }
+
+  handleKeyPress(event: KeyboardEvent): void {
+    this.keyPressed.emit(event);
   }
 }

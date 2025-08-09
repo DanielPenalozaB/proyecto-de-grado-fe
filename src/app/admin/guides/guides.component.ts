@@ -1,18 +1,18 @@
-import { GuideFormComponent, GuideFormData } from '@/app/feature/admin/guides/guide-form/guide-form.component';
 import { Languages } from '@/common/common.interface';
 import {
-    UbDialogCloseDirective,
-    UbDialogContentDirective,
-    UbDialogDescriptionDirective,
-    UbDialogFooterDirective,
-    UbDialogHeaderDirective,
-    UbDialogTitleDirective
+  UbDialogCloseDirective,
+  UbDialogContentDirective,
+  UbDialogDescriptionDirective,
+  UbDialogFooterDirective,
+  UbDialogHeaderDirective,
+  UbDialogTitleDirective
 } from '@/components/ui/dialog';
 import { DialogService } from '@/components/ui/dialog.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FunnelX, LucideAngularModule, Plus, Search, Trash2 } from 'lucide-angular';
+import { Router } from '@angular/router';
+import { Edit, FunnelX, LucideAngularModule, Plus, Search, Trash2 } from 'lucide-angular';
 import { toast } from "ngx-sonner";
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ContentLayoutComponent } from '../../shared/layout/content-layout/content-layout.component';
@@ -30,7 +30,6 @@ import { GuideSearchParams, GuidesService } from './guides.service';
     ContentLayoutComponent,
     TableComponent,
     LucideAngularModule,
-    GuideFormComponent,
     UbDialogContentDirective,
     UbDialogDescriptionDirective,
     UbDialogFooterDirective,
@@ -42,27 +41,15 @@ import { GuideSearchParams, GuidesService } from './guides.service';
   styleUrls: ['./guides.component.css']
 })
 export class GuidesComponent implements OnInit, OnDestroy {
-  @ViewChild('createDialog', { static: true }) createDialogTpl!: TemplateRef<unknown>;
-  @ViewChild('editDialog', { static: true }) editDialogTpl!: TemplateRef<unknown>;
   @ViewChild('deleteDialog', { static: true }) deleteDialogTpl!: TemplateRef<unknown>;
-  @ViewChild('createGuideForm') createGuideForm!: GuideFormComponent;
-  @ViewChild('editGuideForm') editGuideForm!: GuideFormComponent;
 
   readonly Search = Search;
   readonly FunnelX = FunnelX;
 
   guides: Guide[] = [];
-  loading = false;
-  currentGuide: GuideFormData = {
-    name: '',
-    description: '',
-    difficulty: GuideDifficulty.BEGINNER,
-    estimatedDuration: 0,
-    status: GuideStatus.DRAFT,
-    language: Languages.ES,
-    points: 0
-  };
-
+  loadingTable = false;
+  loadingDelete = false;
+  currentGuide: Guide | null = null;
   searchSubject = new Subject<string>();
   searchTerm = '';
   filterParams: GuideSearchParams = {};
@@ -86,12 +73,11 @@ export class GuidesComponent implements OnInit, OnDestroy {
   };
 
   columns: TableColumn[] = [
-    { key: 'name', label: 'Nombre' },
     {
-      key: 'description',
-      label: 'Descripción',
-      class: 'w-2xs!',
-      truncate: true,
+      key: 'name',
+      label: 'Nombre',
+      class: 'min-w-2xs!',
+      truncate: true
     },
     {
       key: 'difficulty',
@@ -111,7 +97,7 @@ export class GuidesComponent implements OnInit, OnDestroy {
       label: 'Duración (min)',
       type: 'badge',
       class: 'w-32',
-      format: (value: unknown) => value ? `${value} min` : 'N/A'
+      format: (value: unknown) => value ? `${value.toString()} min` : 'N/A'
     },
     {
       key: 'status',
@@ -142,7 +128,7 @@ export class GuidesComponent implements OnInit, OnDestroy {
       label: 'Puntos',
       type: 'badge',
       class: 'w-24',
-      format: (value: unknown) => value ? `${value} pts` : 'N/A'
+      format: (value: unknown) => value ? `${value.toString()} pts` : 'N/A'
     },
     {
       key: 'createdAt',
@@ -161,8 +147,8 @@ export class GuidesComponent implements OnInit, OnDestroy {
   tableActions: TableAction<Guide>[] = [
     {
       label: 'Editar',
-      icon: Plus,
-      action: (row) => this.openEditDialog(row),
+      icon: Edit,
+      action: (row) => this.navigateToEdit(row),
       style: 'text-primary-600 hover:text-primary-900'
     },
     {
@@ -177,14 +163,15 @@ export class GuidesComponent implements OnInit, OnDestroy {
     {
       label: 'Crear guía',
       icon: Plus,
-      action: () => this.openCreateDialog(),
+      action: () => this.navigateToCreate(),
       style: 'bg-primary text-primary-foreground hover:bg-primary/90'
     }
   ];
 
   constructor(
     private guidesService: GuidesService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -204,7 +191,7 @@ export class GuidesComponent implements OnInit, OnDestroy {
   }
 
   loadGuides(): void {
-    this.loading = true;
+    this.loadingTable = true;
 
     const params: GuideSearchParams = {
       ...this.filterParams,
@@ -229,11 +216,11 @@ export class GuidesComponent implements OnInit, OnDestroy {
             hasPreviousPage: response.meta.hasPreviousPage || false
           };
         }
-        this.loading = false;
+        this.loadingTable = false;
       },
       error: (err) => {
         toast.error('Error al obtener las guías. Por favor, inténtalo de nuevo.');
-        this.loading = false;
+        this.loadingTable = false;
         console.error(err);
       }
     });
@@ -265,95 +252,48 @@ export class GuidesComponent implements OnInit, OnDestroy {
     this.loadGuides();
   }
 
-  openCreateDialog(): void {
-    this.currentGuide = {
-      name: '',
-      description: '',
-      difficulty: GuideDifficulty.BEGINNER,
-      estimatedDuration: 0,
-      status: GuideStatus.DRAFT,
-      language: Languages.ES,
-      points: 0
-    };
-    this.dialogService.open(this.createDialogTpl);
+  // Navigation methods
+  navigateToCreate(): void {
+    this.router.navigate(['/admin/guides/create']);
   }
 
-  openEditDialog(guide: Guide): void {
-    this.currentGuide = { ...guide };
-    this.dialogService.open(this.editDialogTpl);
+  navigateToEdit(guide: Guide): void {
+    this.router.navigate(['/admin/guides/edit', guide.id]);
   }
 
   openDeleteDialog(guide: Guide): void {
-    this.currentGuide = { ...guide };
+    this.currentGuide = guide;
     this.dialogService.open(this.deleteDialogTpl);
   }
 
-  onCreateGuide(guideData: GuideFormData): void {
-    this.loading = true;
-    this.guidesService.createGuide(guideData).subscribe({
-      next: (response) => {
-        this.guides = [response.data, ...this.guides];
-        this.pagination.totalItems++;
-        this.dialogService.close();
-        this.loading = false;
-        toast.success(response.message || 'Guía creada exitosamente');
-      },
-      error: (err) => {
-        toast.error(err.error?.message || 'Error al crear la guía. Por favor, inténtalo de nuevo.');
-        this.loading = false;
-        console.error(err);
-      }
-    });
-  }
-
-  onUpdateGuide(guideData: GuideFormData): void {
-    if (!guideData.id) return;
-
-    this.loading = true;
-    this.guidesService.updateGuide(guideData.id, guideData).subscribe({
-      next: (response) => {
-        this.guides = this.guides.map(g =>
-          g.id === response.data.id ? response.data : g
-        );
-        this.dialogService.close();
-        this.loading = false;
-        toast.success(response.message || 'Guía actualizada exitosamente');
-      },
-      error: (err) => {
-        toast.error(err.error?.message || 'Error al actualizar la guía. Por favor, inténtalo de nuevo.');
-        this.loading = false;
-        console.error(err);
-      }
-    });
-  }
-
-  onDeleteGuide(guideData: GuideFormData): void {
-    if (!guideData.id) {
+  onDeleteGuide(): void {
+    if (!this.currentGuide?.id) {
       toast.error('No se puede eliminar la guía: ID no válido');
       return;
     }
 
-    this.loading = true;
+    this.loadingDelete = true;
     this.dialogService.close();
 
-    this.guidesService.deleteGuide(guideData.id).subscribe({
+    this.guidesService.deleteGuide(this.currentGuide.id).subscribe({
       next: (response) => {
-        this.guides = this.guides.filter(g => g.id !== guideData.id);
+        this.guides = this.guides.filter(g => g.id !== this.currentGuide!.id);
         this.pagination.totalItems--;
         toast.success(response.message || 'Guía eliminada exitosamente');
-        this.loading = false;
+        this.loadingDelete = false;
+        this.currentGuide = null;
       },
       error: (err) => {
         toast.error(err.error?.message || 'Error al eliminar la guía. Por favor, inténtalo de nuevo.');
         console.error(err);
-        this.loading = false;
+        this.loadingDelete = false;
       }
     });
   }
 
   onAction(event: { action: string; row: Guide }): void {
     if (event.action === 'Editar') {
-      this.openEditDialog(event.row);
+      this.navigateToEdit(event.row);
     } else if (event.action === 'Eliminar') {
       this.openDeleteDialog(event.row);
     }

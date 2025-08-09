@@ -1,0 +1,123 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+  <!-- Basic Information -->
+  <div class="space-y-4">
+    <h3 class="text-lg font-medium text-gray-900">Información Básica</h3>
+
+    <!-- Name -->
+    <div class="space-y-2">
+      <app-label for="name">Nombre de la Guía *</app-label>
+      <input id="name" type="text" formControlName="name" placeholder="Ej: Conceptos Básicos de Conservación del Agua"
+        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched" />
+      @if (form.get('name')?.invalid && form.get('name')?.touched) {
+      <p class="text-sm text-red-600">
+        @if (form.get('name')?.errors?.['required']) {
+        El nombre es requerido
+        }
+        @if (form.get('name')?.errors?.['minlength']) {
+        El nombre debe tener al menos 3 caracteres
+        }
+      </p>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="space-y-2">
+      <app-label for="description">Descripción *</app-label>
+      <textarea id="description" formControlName="description" rows="4"
+        placeholder="Describe el contenido y objetivos de esta guía..."
+        class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-vertical"
+        [class.border-red-500]="form.get('description')?.invalid && form.get('description')?.touched"></textarea>
+      @if (form.get('description')?.invalid && form.get('description')?.touched) {
+      <p class="text-sm text-red-600">
+        @if (form.get('description')?.errors?.['required']) {
+        La descripción es requerida
+        }
+        @if (form.get('description')?.errors?.['minlength']) {
+        La descripción debe tener al menos 10 caracteres
+        }
+      </p>
+      }
+    </div>
+  </div>
+
+  <!-- Configuration -->
+  <div class="space-y-4">
+    <h3 class="text-lg font-medium text-gray-900">Configuración</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Difficulty -->
+      <div class="space-y-2">
+        <app-label for="difficulty">Dificultad *</app-label>
+        <app-select [options]="difficultyOptions" [placeholder]="'Selecciona la dificultad'"
+          formControlName="difficulty"
+          [error]="form.get('difficulty')?.invalid && form.get('difficulty')?.touched ? 'La dificultad es requerida' : null"></app-select>
+      </div>
+
+      <!-- Status -->
+      <div class="space-y-2">
+        <app-label for="status">Estado *</app-label>
+        <app-select [options]="statusOptions" [placeholder]="'Selecciona el estado'" formControlName="status"
+          [error]="form.get('status')?.invalid && form.get('status')?.touched ? 'El estado es requerido' : null"></app-select>
+      </div>
+
+      <!-- Language -->
+      <div class="space-y-2">
+        <app-label for="language">Idioma *</app-label>
+        <app-select [options]="languageOptions" [placeholder]="'Selecciona el idioma'" formControlName="language"
+          [error]="form.get('language')?.invalid && form.get('language')?.touched ? 'El idioma es requerido' : null"></app-select>
+      </div>
+
+      <!-- Estimated Duration -->
+      <div class="space-y-2">
+        <app-label for="estimatedDuration">Duración Estimada (minutos) *</app-label>
+        <input id="estimatedDuration" type="number" formControlName="estimatedDuration" placeholder="60" min="1"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          [class.border-red-500]="form.get('estimatedDuration')?.invalid && form.get('estimatedDuration')?.touched" />
+        @if (form.get('estimatedDuration')?.invalid && form.get('estimatedDuration')?.touched) {
+          <p class="text-sm text-red-600">
+            @if (form.get('estimatedDuration')?.errors?.['required']) {
+              La duración estimada es requerida
+            }
+            @if (form.get('estimatedDuration')?.errors?.['min']) {
+              La duración debe ser mayor a 0 minutos
+            }
+          </p>
+        }
+      </div>
+
+      <!-- Points -->
+      <div class="space-y-2">
+        <app-label for="points">Puntos Totales *</app-label>
+        <input id="points" type="number" formControlName="points" placeholder="100" min="0"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          [class.border-red-500]="form.get('points')?.invalid && form.get('points')?.touched" />
+        @if (form.get('points')?.invalid && form.get('points')?.touched) {
+          <p class="text-sm text-red-600">
+            @if (form.get('points')?.errors?.['required']) {
+              Los puntos son requeridos
+            }
+            @if (form.get('points')?.errors?.['min']) {
+              Los puntos deben ser 0 o mayor
+            }
+          </p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex justify-end gap-2 pt-6 border-t border-gray-200">
+    <app-button type="button" variant="outline" (click)="onCancel()" [disabled]="loading">
+      Cancelar
+    </app-button>
+    <app-button type="submit" [disabled]="form.invalid || loading" class="min-w-[120px]">
+      @if (loading) {
+      <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+      {{ isEditMode ? 'Actualizando...' : 'Creando...' }}
+      } @else {
+      {{ isEditMode ? 'Actualizar Guía' : 'Crear Guía' }}
+      }
+    </app-button>
+  </div>
+</form>

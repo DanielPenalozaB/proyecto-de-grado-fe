@@ -78,7 +78,6 @@ export class ModuleFormComponent implements OnInit {
     this.guidesService.getGuides({ limit: 100 }).subscribe({
       next: (response) => {
         this.guides = response.data;
-        console.log(this.guides);
         this.loadingGuides = false;
       },
       error: (err) => {

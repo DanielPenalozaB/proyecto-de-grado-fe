@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   DropdownAlign,
@@ -34,8 +34,9 @@ export interface SelectOption {
     }
   ],
   template: `
-    <div class="relative">
+    <div class="relative" #selectContainer>
       <button
+        #triggerButton
         type="button"
         [rdxDropdownMenuTrigger]="selectMenu"
         [side]="side"
@@ -47,6 +48,7 @@ export interface SelectOption {
         [attr.aria-expanded]="false"
         [attr.aria-haspopup]="'listbox'"
         [attr.aria-labelledby]="labelId"
+        (click)="syncDropdownWidth()"
       >
         <span class="block truncate text-left">
           @if (selectedOption) {
@@ -62,7 +64,10 @@ export interface SelectOption {
 
       <ng-template #selectMenu>
         <div
-          class="z-50 max-h-60 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto overflow-x-hidden rounded-md border bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]"
+          #dropdownContent
+          class="z-50 max-h-60 overflow-y-auto overflow-x-hidden rounded-md border bg-white shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          [style.width.px]="dropdownWidth"
+          [style.min-width.px]="dropdownWidth"
           rdxDropdownMenuContent
           role="listbox"
         >
@@ -97,9 +102,13 @@ export interface SelectOption {
       <p class="mt-1 text-sm text-red-600">{{ error }}</p>
     }
   `,
-  styleUrls: ['./select.component.css']
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
-export class SelectComponent implements ControlValueAccessor, OnInit {
+export class SelectComponent implements ControlValueAccessor, OnInit, AfterViewInit, OnDestroy {
   @Input() options: SelectOption[] = [];
   @Input() placeholder = 'Select an option';
   @Input() disabled = false;
@@ -115,7 +124,12 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
 
   @Output() selectionChange = new EventEmitter<SelectOption | null>();
 
+  @ViewChild('triggerButton', { static: false }) triggerButton!: ElementRef<HTMLButtonElement>;
+  @ViewChild('dropdownContent', { static: false }) dropdownContent!: ElementRef<HTMLDivElement>;
+  @ViewChild('selectContainer', { static: false }) selectContainer!: ElementRef<HTMLDivElement>;
+
   selectedOption: SelectOption | null = null;
+  dropdownWidth: number = 0;
   private value: any = null;
 
   // Icons
@@ -129,6 +143,11 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   // Control Value Accessor
   private onChange = (value: any) => { };
   private onTouched = () => { };
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncDropdownWidth();
+  }
 
   get buttonClasses(): string {
     const baseClasses = 'relative w-full cursor-pointer rounded-md border bg-white py-2 pl-3 pr-10 text-left shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500';
@@ -153,6 +172,29 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
     // Find initial selection if value is set
     if (this.value !== null && this.options.length > 0) {
       this.selectedOption = this.options.find(option => option.value === this.value) || null;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Set initial dropdown width
+    this.syncDropdownWidth();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up if needed
+  }
+
+  syncDropdownWidth(): void {
+    if (this.triggerButton?.nativeElement) {
+      const width = this.triggerButton.nativeElement.offsetWidth;
+      this.dropdownWidth = width;
+
+      setTimeout(() => {
+        const currentWidth = this.triggerButton.nativeElement.offsetWidth;
+        if (currentWidth !== this.dropdownWidth) {
+          this.dropdownWidth = currentWidth;
+        }
+      }, 10);
     }
   }
 

@@ -53,7 +53,6 @@ export class SignUpComponent implements OnInit {
     ).subscribe({
       next: (cities) => {
         this.cities = cities.data;
-        console.log(cities);
         if (cities.data.length > 0) {
           this.registerForm.patchValue({
             cityId: cities.data[0].id

@@ -1,0 +1,73 @@
+<div class="flex flex-col gap-5 p-6">
+  <div class="flex items-center gap-4 bg-white shadow-sm rounded-lg p-6">
+    <span class="bg-teal-600 rounded-full size-16 flex items-center justify-center text-white text-2xl font-bold">
+      @if (user?.avatar) {
+        <img [src]="user?.avatar" [alt]="user?.name" class="h-8 w-8 rounded-full object-cover">
+      } @else {
+        {{ getInitials(user?.name || '') }}
+      }
+    </span>
+    <div class="flex flex-col">
+      <span class="text-[#115E59] text-lg font-bold">{{ user?.name }}</span>
+      <span class="text-neutral-500 text-base font-medium">{{ user?.email }}</span>
+    </div>
+  </div>
+  <div class="flex flex-col md:flex-row items-center w-full gap-5">
+    <div class="flex items-center gap-5 w-full">
+      <div class="flex flex-col justify-center items-center w-full gap-3 p-6 bg-white shadow-sm rounded-lg">
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="BadgeCheck" class="text-sky-500 size-6" />
+          <span class="text-[#115E59] text-2xl font-bold">2</span>
+        </div>
+        <span class="text-neutral-500 text-base text-center font-medium sm:whitespace-nowrap">Guías completadas</span>
+      </div>
+      <div class="flex flex-col justify-center items-center w-full gap-3 p-6 bg-white shadow-sm rounded-lg">
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="Trophy" class="text-yellow-500 size-6" />
+          <span class="text-[#115E59] text-2xl font-bold">320</span>
+        </div>
+        <span class="text-neutral-500 text-base text-center font-medium sm:whitespace-nowrap">Experiencia obtenida</span>
+      </div>
+    </div>
+    <div class="flex flex-col justify-center items-center gap-3 w-full p-6 bg-white shadow-sm rounded-lg">
+      <div class="flex items-center gap-2">
+        <span class="text-[#115E59] text-2xl font-bold">350</span>
+      </div>
+      <span class="text-neutral-500 text-base text-center font-medium sm:whitespace-nowrap">Litros ahorrados</span>
+    </div>
+  </div>
+  <div class="mt-2 flex flex-col gap-4">
+    <h2 class="font-bold text-xl text-teal-800">Tu información</h2>
+    <div class="flex gap-2 w-full p-2 rounded-lg bg-neutral-200">
+      <div class="bg-white rounded-md p-2 text-neutral-800 font-medium text-center text-base w-full">
+        Aprendizaje
+      </div>
+      <div class="bg-neutral-200 rounded-md p-2 text-neutral-500 font-medium text-center text-base w-full">
+        Logros
+      </div>
+    </div>
+    <div class="gap-5 flex flex-col p-6 bg-white border rounded-2xl">
+      <div class="gap-2 flex flex-col">
+        <h2 class="text-xl font-bold text-teal-600">Tu progreso</h2>
+      </div>
+      <div class="gap-2 flex flex-col">
+        <div class="flex items-center justify-between gap-2 text-base font-medium text-[#14B8A6]">
+          <span class="text-neutral-800">Introducción</span>
+          <span>Completo</span>
+        </div>
+        <div class="flex justify-start h-3 w-full bg-neutral-200 rounded-full">
+          <span class="bg-[#14B8A6] h-3 rounded-full w-full"></span>
+        </div>
+      </div>
+      <div class="gap-2 flex flex-col">
+        <div class="flex items-center justify-between gap-2 text-base font-medium text-[#14B8A6]">
+          <span class="text-neutral-800">Canaletas</span>
+          <span>50%</span>
+        </div>
+        <div class="flex justify-start h-3 w-full bg-neutral-200 rounded-full">
+          <span class="bg-[#14B8A6] h-3 rounded-full w-1/2"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

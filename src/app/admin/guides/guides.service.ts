@@ -2,7 +2,6 @@ import { ApiResponse, DataResponse, Languages, MessageResponse } from '@/common/
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Guide, GuideDifficulty, GuideStatus } from './guides.interface';
 
 export interface GuideSearchParams {
@@ -20,13 +19,33 @@ export interface GuideSearchParams {
   maxPoints?: number;
 }
 
+export interface CreateGuideDto {
+  name: string;
+  description: string;
+  difficulty: string;
+  estimatedDuration: number;
+  status?: string;
+  language: string;
+  totalPoints: number;
+}
+
+export interface UpdateGuideDto {
+  name: string;
+  description: string;
+  difficulty: string;
+  estimatedDuration: number;
+  status?: string;
+  language: string;
+  totalPoints: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GuidesService {
-  private apiUrl = 'http://localhost:4000/guides';
+  private readonly apiUrl = 'http://localhost:4000/guides';
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   getGuides(params: GuideSearchParams = {}): Observable<ApiResponse<Guide>> {
     let httpParams = new HttpParams();
@@ -47,16 +66,15 @@ export class GuidesService {
     return this.http.get<ApiResponse<Guide>>(this.apiUrl, { params: httpParams });
   }
 
-  getGuide(id: number): Observable<Guide> {
-    return this.http.get<{ data: Guide }>(`${this.apiUrl}/${id}`)
-      .pipe(map(response => response.data));
+  getGuideById(id: number): Observable<DataResponse<Guide>> {
+    return this.http.get<DataResponse<Guide>>(`${this.apiUrl}/${id}`);
   }
 
-  createGuide(guideData: Omit<Guide, 'id'>): Observable<DataResponse<Guide>> {
+  createGuide(guideData: CreateGuideDto): Observable<DataResponse<Guide>> {
     return this.http.post<DataResponse<Guide>>(this.apiUrl, guideData);
   }
 
-  updateGuide(id: number, guideData: Partial<Guide>): Observable<DataResponse<Guide>> {
+  updateGuide(id: number, guideData: UpdateGuideDto): Observable<DataResponse<Guide>> {
     return this.http.put<DataResponse<Guide>>(`${this.apiUrl}/${id}`, guideData);
   }
 

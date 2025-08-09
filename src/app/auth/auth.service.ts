@@ -6,10 +6,12 @@ import { BehaviorSubject, Observable, Subject, takeUntil, tap, timer } from 'rxj
 import { environment } from '../../environments/environment';
 
 interface LoginResponse {
-  user: User;
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn?: number; // Add this to get token expiration time
+  data: {
+    user: User;
+    accessToken: string;
+    refreshToken?: string;
+    expiresIn?: number; // Add this to get token expiration time
+  }
 }
 
 interface RegisterResponse {
@@ -171,22 +173,24 @@ export class AuthService {
   }
 
   private handleAuthentication(response: LoginResponse): void {
-    const expiresIn = response.expiresIn || (24 * 60 * 60); // Default 24 hours in seconds
+    const expiresIn = response.data.expiresIn || (24 * 60 * 60); // Default 24 hours in seconds
     const expiresAt = Date.now() + (expiresIn * 1000);
 
-    localStorage.setItem('currentUser', JSON.stringify(response.user));
-    localStorage.setItem('accessToken', response.accessToken);
+    console.log('Login successful:', response.data.user);
+
+    localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+    localStorage.setItem('accessToken', response.data.accessToken);
     localStorage.setItem('tokenExpiresAt', expiresAt.toString());
 
-    if (response.refreshToken) {
-      localStorage.setItem('refreshToken', response.refreshToken);
+    if (response.data.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
     }
 
-    this.currentUserSubject.next(response.user);
+    this.currentUserSubject.next(response.data.user);
     this.scheduleTokenRefresh(expiresAt);
 
     toast.success('Login successful');
-    this.router.navigate([this.getDefaultRouteForRole(response.user.role)]);
+    this.router.navigate([this.getDefaultRouteForRole(response.data.user.role)]);
   }
 
   private getDefaultRouteForRole(role: string): string {
