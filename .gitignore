@@ -42,3 +42,6 @@ testem.log
 Thumbs.db
 
 tailwind.config.ts
+
+# Environment files
+.env

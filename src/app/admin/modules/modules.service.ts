@@ -1,4 +1,5 @@
 import { ApiResponse, DataResponse, MessageResponse } from '@/common/common.interface';
+import { environment } from '@/environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -22,11 +23,11 @@ export interface ModuleSearchParams {
   providedIn: 'root'
 })
 export class ModulesService {
-  private apiUrl = 'http://localhost:4000/modules';
+  private readonly apiUrl = `${environment.apiUrl}modules`;
 
   constructor(
-    private http: HttpClient,
-    private guidesService: GuidesService
+    private readonly http: HttpClient,
+    private readonly guidesService: GuidesService
   ) { }
 
   getModules(params: ModuleSearchParams = {}): Observable<ApiResponse<Module>> {

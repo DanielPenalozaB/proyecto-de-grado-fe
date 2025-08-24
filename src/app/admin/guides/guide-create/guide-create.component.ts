@@ -6,7 +6,6 @@ import { ArrowLeft, LucideAngularModule } from 'lucide-angular';
 import { toast } from 'ngx-sonner';
 import { Subscription } from 'rxjs';
 import { ContentLayoutComponent } from '../../../shared/layout/content-layout/content-layout.component';
-import { ButtonComponent } from '../../../shared/ui/button/button.component';
 import { GuideFormComponent, GuideFormData } from '../guide-form/guide-form.component';
 import { GuidesService } from '../guides.service';
 
@@ -17,7 +16,6 @@ import { GuidesService } from '../guides.service';
     CommonModule,
     ContentLayoutComponent,
     GuideFormComponent,
-    ButtonComponent,
     LucideAngularModule
   ],
   template: `
@@ -25,20 +23,8 @@ import { GuidesService } from '../guides.service';
       [title]="'Crear Nueva Guía'"
       [description]="'Añade una nueva guía al sistema con toda la información necesaria'"
     >
-      <!-- Back Button -->
-      <div class="mb-6">
-        <app-button
-          variant="outline"
-          (click)="goBack()"
-          class="inline-flex items-center"
-        >
-          <lucide-icon [img]="ArrowLeft" class="w-4 h-4 mr-2"></lucide-icon>
-          Volver a Guías
-        </app-button>
-      </div>
-
       <!-- Form Container -->
-      <div class="max-w-4xl p-2">
+      <div class="p-2 w-full">
         <app-guide-form
           [isEditMode]="false"
           [loading]="loading"

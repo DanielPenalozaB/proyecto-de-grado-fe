@@ -1,4 +1,4 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 mx-auto">
   <!-- Basic Information -->
   <div class="space-y-4">
     <h3 class="text-lg font-medium text-gray-900">Información Básica</h3>
@@ -108,7 +108,7 @@
 
   <!-- Form Actions -->
   <div class="flex justify-end gap-2 pt-6 border-t border-gray-200">
-    <app-button type="button" variant="outline" (click)="onCancel()" [disabled]="loading">
+    <app-button type="button" variant="outline" (click)="onCancel()" [disabled]="loading" (keydown)="onCancel()">
       Cancelar
     </app-button>
     <app-button type="submit" [disabled]="form.invalid || loading" class="min-w-[120px]">

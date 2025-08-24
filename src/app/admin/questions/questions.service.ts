@@ -1,4 +1,5 @@
 import { ApiResponse, DataResponse, MessageResponse } from '@/common/common.interface';
+import { environment } from '@/environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -22,11 +23,11 @@ export interface QuestionSearchParams {
   providedIn: 'root'
 })
 export class QuestionsService {
-  private apiUrl = 'http://localhost:4000/questions';
+  private readonly apiUrl = `${environment.apiUrl}questions`;
 
   constructor(
-    private http: HttpClient,
-    private modulesService: ModulesService
+    private readonly http: HttpClient,
+    private readonly modulesService: ModulesService
   ) { }
 
   getQuestions(params: QuestionSearchParams = {}): Observable<ApiResponse<Question>> {

@@ -1,4 +1,5 @@
 import { ApiResponse, DataResponse, Languages, MessageResponse } from '@/common/common.interface';
+import { environment } from '@/environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -43,7 +44,7 @@ export interface UpdateGuideDto {
   providedIn: 'root'
 })
 export class GuidesService {
-  private readonly apiUrl = 'http://localhost:4000/guides';
+  private readonly apiUrl = `${environment.apiUrl}/guides`;
 
   constructor(private readonly http: HttpClient) { }
 
