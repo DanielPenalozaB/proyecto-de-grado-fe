@@ -1,5 +1,6 @@
 import { CityFormData } from '@/app/feature/admin/cities/city-form.component';
 import { ApiResponse, DataResponse, MessageResponse } from '@/common/common.interface';
+import { environment } from '@/environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -19,7 +20,7 @@ export interface CitySearchParams {
   providedIn: 'root'
 })
 export class CitiesService {
-  private readonly apiUrl = 'http://localhost:4000/cities';
+  private readonly apiUrl = `${environment.apiUrl}/cities`;
 
   constructor(private readonly http: HttpClient) { }
 
